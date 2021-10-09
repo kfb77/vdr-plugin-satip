@@ -5,9 +5,9 @@
  *
  */
 
+#include "satip.h"
 #include <ctype.h>
 #include <getopt.h>
-#include <vdr/plugin.h>
 #include "common.h"
 #include "config.h"
 #include "device.h"
@@ -31,41 +31,11 @@
        const char VERSION[]     = "2.4.1" GITVERSION;
 static const char DESCRIPTION[] = trNOOP("SAT>IP Devices");
 
-class cPluginSatip : public cPlugin {
-private:
-  unsigned int deviceCountM;
-  cSatipDiscoverServers *serversM;
-  void ParseServer(const char *paramP);
-  void ParsePortRange(const char *paramP);
-  int ParseCicams(const char *valueP, int *cicamsP);
-  int ParseSources(const char *valueP, int *sourcesP);
-  int ParseFilters(const char *valueP, int *filtersP);
-public:
-  cPluginSatip(void);
-  virtual ~cPluginSatip();
-  virtual const char *Version(void) { return VERSION; }
-  virtual const char *Description(void) { return tr(DESCRIPTION); }
-  virtual const char *CommandLineHelp(void);
-  virtual bool ProcessArgs(int argc, char *argv[]);
-  virtual bool Initialize(void);
-  virtual bool Start(void);
-  virtual void Stop(void);
-  virtual void Housekeeping(void);
-  virtual void MainThreadHook(void);
-  virtual cString Active(void);
-  virtual time_t WakeupTime(void);
-  virtual const char *MainMenuEntry(void) { return NULL; }
-  virtual cOsdObject *MainMenuAction(void);
-  virtual cMenuSetupPage *SetupMenu(void);
-  virtual bool SetupParse(const char *Name, const char *Value);
-  virtual bool Service(const char *Id, void *Data = NULL);
-  virtual const char **SVDRPHelpPages(void);
-  virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
-  };
 
-cPluginSatip::cPluginSatip(void)
-: deviceCountM(2),
-  serversM(NULL)
+/*******************************************************************************
+ * class cPluginSatip
+ ******************************************************************************/
+cPluginSatip::cPluginSatip(void) : deviceCountM(2), serversM(NULL)
 {
   debug16("%s", __PRETTY_FUNCTION__);
   // Initialize any member variables here.
@@ -77,6 +47,22 @@ cPluginSatip::~cPluginSatip()
 {
   debug16("%s", __PRETTY_FUNCTION__);
   // Clean up after yourself!
+}
+
+
+const char *cPluginSatip::Version(void)
+{
+  return VERSION;
+}
+
+const char *cPluginSatip::Description(void)
+{
+  return tr(DESCRIPTION);
+}
+
+const char *cPluginSatip::MainMenuEntry(void)
+{
+  return NULL;
 }
 
 const char *cPluginSatip::CommandLineHelp(void)
