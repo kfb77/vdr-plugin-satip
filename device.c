@@ -4,7 +4,7 @@
  * See the README file for copyright information and how to reach the author.
  *
  */
-
+#include <string>
 #include <vdr/menu.h> // cRecordControl
 
 #include "config.h"
@@ -205,9 +205,13 @@ cString cSatipDevice::DeviceType(void) const
 cString cSatipDevice::DeviceName(void) const
 {
   debug16("%s [device %u]", __PRETTY_FUNCTION__, deviceIndexM);
-  if (!Receiving())
-     return cString::sprintf("%s %d", *DeviceType(), deviceIndexM);
-  return deviceNameM;
+  std::string sys;
+  const char* s = "ACST";
+  for(int i=0; s[i]; i++)
+     if (ProvidesSource(s[i] << 24))
+        sys += s[i];
+
+  return cString::sprintf("%s %d (%s)", *DeviceType(), deviceIndexM, sys.c_str());
 }
 
 bool cSatipDevice::AvoidRecording(void) const
