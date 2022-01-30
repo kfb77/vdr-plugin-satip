@@ -183,7 +183,7 @@ bool cPluginSatip::Start(void)
       if (startswith(data->protocols[i], "rtsp"))
          info = cString::sprintf("%s %s", *info, data->protocols[i]);
       }
-  info("%s", *info);
+  dbg_rtsp("%s", *info);
   return true;
 }
 
