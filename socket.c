@@ -36,7 +36,7 @@ cSatipSocket::cSatipSocket()
   sourceAddrM(htonl(INADDR_ANY)),
   rcvBufSizeM(0)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   memset(&sockAddrM, 0, sizeof(sockAddrM));
 }
 
@@ -49,13 +49,13 @@ cSatipSocket::cSatipSocket(size_t rcvBufSizeP)
   sourceAddrM(htonl(INADDR_ANY)),
   rcvBufSizeM(rcvBufSizeP)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   memset(&sockAddrM, 0, sizeof(sockAddrM));
 }
 
 cSatipSocket::~cSatipSocket()
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Close the socket
   Close();
 }
@@ -65,7 +65,7 @@ bool cSatipSocket::Open(const int portP, const bool reuseP)
   // If socket is there already and it is bound to a different port, it must
   // be closed first
   if (portP != socketPortM) {
-     debug1("%s (%d, %d) Socket tear-down", __PRETTY_FUNCTION__, portP, reuseP);
+     dbg_funcname("%s (%d, %d) Socket tear-down", __PRETTY_FUNCTION__, portP, reuseP);
      Close();
      }
   // Bind to the socket if it is not active already
@@ -110,13 +110,13 @@ bool cSatipSocket::Open(const int portP, const bool reuseP)
      socketPortM = ntohs(sockAddrM.sin_port);
      isMulticastM = false;
      }
-  debug1("%s (%d) socketPort=%d", __PRETTY_FUNCTION__, portP, socketPortM);
+  dbg_funcname("%s (%d) socketPort=%d", __PRETTY_FUNCTION__, portP, socketPortM);
   return true;
 }
 
 bool cSatipSocket::OpenMulticast(const int portP, const char *streamAddrP, const char *sourceAddrP)
 {
-  debug1("%s (%d, %s, %s)", __PRETTY_FUNCTION__, portP, streamAddrP, sourceAddrP);
+  dbg_funcname("%s (%d, %s, %s)", __PRETTY_FUNCTION__, portP, streamAddrP, sourceAddrP);
   if (Open(portP)) {
      CheckAddress(streamAddrP, &streamAddrM);
      if (!isempty(sourceAddrP))
@@ -128,7 +128,7 @@ bool cSatipSocket::OpenMulticast(const int portP, const char *streamAddrP, const
 
 void cSatipSocket::Close(void)
 {
-  debug1("%s socketPort=%d", __PRETTY_FUNCTION__, socketPortM);
+  dbg_funcname("%s socketPort=%d", __PRETTY_FUNCTION__, socketPortM);
   // Check if socket exists
   if (socketDescM >= 0) {
      Leave();
@@ -145,7 +145,7 @@ void cSatipSocket::Close(void)
 
 bool cSatipSocket::Flush(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   if (socketDescM < 0) {
      const unsigned int len = 65535;
      unsigned char *buf = MALLOC(unsigned char, len);
@@ -168,7 +168,7 @@ bool cSatipSocket::CheckAddress(const char *addrP, in_addr_t *inAddrP)
      // First try only the IP address
      *inAddrP = inet_addr(addrP);
      if (*inAddrP == htonl(INADDR_NONE)) {
-        debug1("%s (%s, ) Cannot convert to address", __PRETTY_FUNCTION__, addrP);
+        dbg_funcname("%s (%s, ) Cannot convert to address", __PRETTY_FUNCTION__, addrP);
         // It may be a host name, get the name
         struct hostent *host = gethostbyname(addrP);
         if (!host) {
@@ -186,7 +186,7 @@ bool cSatipSocket::CheckAddress(const char *addrP, in_addr_t *inAddrP)
 
 bool cSatipSocket::Join(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Check if socket exists
   if (socketDescM >= 0 && !isMulticastM) {
      // Join a new multicast group
@@ -220,7 +220,7 @@ bool cSatipSocket::Join(void)
 
 bool cSatipSocket::Leave(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Check if socket exists
   if (socketDescM >= 0 && isMulticastM) {
      // Leave the existing multicast group
@@ -254,7 +254,7 @@ bool cSatipSocket::Leave(void)
 
 int cSatipSocket::Read(unsigned char *bufferAddrP, unsigned int bufferLenP)
 {
-  debug16("%s (, %d)", __PRETTY_FUNCTION__, bufferLenP);
+  dbg_funcname_ext("%s (, %d)", __PRETTY_FUNCTION__, bufferLenP);
   // Error out if socket not initialized
   if (socketDescM <= 0) {
      error("%s Invalid socket", __PRETTY_FUNCTION__);
@@ -305,7 +305,7 @@ int cSatipSocket::Read(unsigned char *bufferAddrP, unsigned int bufferLenP)
 
 int cSatipSocket::ReadMulti(unsigned char *bufferAddrP, unsigned int *elementRecvSizeP, unsigned int elementCountP, unsigned int elementBufferSizeP)
 {
-  debug16("%s (, , %d, %d)", __PRETTY_FUNCTION__, elementCountP, elementBufferSizeP);
+  dbg_funcname_ext("%s (, , %d, %d)", __PRETTY_FUNCTION__, elementCountP, elementBufferSizeP);
   int count = -1;
   // Error out if socket not initialized
   if (socketDescM <= 0) {
@@ -344,7 +344,7 @@ int cSatipSocket::ReadMulti(unsigned char *bufferAddrP, unsigned int *elementRec
         elementRecvSizeP[count++] = len;
         }
 #endif
-  debug16("%s Received %d packets size[0]=%d", __PRETTY_FUNCTION__, count, elementRecvSizeP[0]);
+  dbg_funcname_ext("%s Received %d packets size[0]=%d", __PRETTY_FUNCTION__, count, elementRecvSizeP[0]);
 
   return count;
 }
@@ -352,7 +352,7 @@ int cSatipSocket::ReadMulti(unsigned char *bufferAddrP, unsigned int *elementRec
 
 bool cSatipSocket::Write(const char *addrP, const unsigned char *bufferAddrP, unsigned int bufferLenP)
 {
-  debug1("%s (%s, , %d)", __PRETTY_FUNCTION__, addrP, bufferLenP);
+  dbg_funcname("%s (%s, , %d)", __PRETTY_FUNCTION__, addrP, bufferLenP);
   // Error out if socket not initialized
   if (socketDescM <= 0) {
      error("%s Invalid socket", __PRETTY_FUNCTION__);

@@ -22,14 +22,14 @@ cSatipRtp::cSatipRtp(cSatipTunerIf &tunerP)
   packetErrorsM(0),
   sequenceNumberM(-1)
 {
-  debug1("%s () [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s () [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (!bufferM)
      error("Cannot create RTP buffer! [device %d]", tunerM.GetId());
 }
 
 cSatipRtp::~cSatipRtp()
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   FREE_POINTER(bufferM);
 }
 
@@ -40,7 +40,7 @@ int cSatipRtp::GetFd(void)
 
 void cSatipRtp::Close(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
 
   cSatipSocket::Close();
 
@@ -54,7 +54,7 @@ void cSatipRtp::Close(void)
 
 int cSatipRtp::GetHeaderLength(unsigned char *bufferP, unsigned int lengthP)
 {
-  debug16("%s (, %d) [device %d]", __PRETTY_FUNCTION__, lengthP, tunerM.GetId());
+  dbg_funcname_ext("%s (, %d) [device %d]", __PRETTY_FUNCTION__, lengthP, tunerM.GetId());
   unsigned int headerlen = 0;
 
   if (lengthP > 0) {
@@ -72,7 +72,7 @@ int cSatipRtp::GetHeaderLength(unsigned char *bufferP, unsigned int lengthP)
         // Payload type: MPEG2 TS = 33
         unsigned int pt = bufferP[1] & 0x7F;
         if (pt != 33)
-           debug7("%s (%d) Received invalid RTP payload type %d - v=%d [device %d]",
+           dbg_rtp_packet("%s (%d) Received invalid RTP payload type %d - v=%d [device %d]",
                     __PRETTY_FUNCTION__, lengthP, pt, v, tunerM.GetId());
         // Sequence number
         int seq = ((bufferP[2] & 0xFF) << 8) | (bufferP[3] & 0xFF);
@@ -100,17 +100,17 @@ int cSatipRtp::GetHeaderLength(unsigned char *bufferP, unsigned int lengthP)
            }
         // Check for empty payload
         if (lengthP == headerlen) {
-           debug7("%s (%d) Received empty RTP packet #%d [device %d]", __PRETTY_FUNCTION__, lengthP, seq, tunerM.GetId());
+           dbg_rtp_packet("%s (%d) Received empty RTP packet #%d [device %d]", __PRETTY_FUNCTION__, lengthP, seq, tunerM.GetId());
            headerlen = -1;
            }
         // Check that rtp is version 2 and payload contains multiple of TS packet data
         else if ((v != 2) || (((lengthP - headerlen) % TS_SIZE) != 0) || (bufferP[headerlen] != TS_SYNC_BYTE)) {
-           debug7("%s (%d) Received incorrect RTP packet #%d v=%d len=%d sync=0x%02X [device %d]", __PRETTY_FUNCTION__,
+           dbg_rtp_packet("%s (%d) Received incorrect RTP packet #%d v=%d len=%d sync=0x%02X [device %d]", __PRETTY_FUNCTION__,
                    lengthP, seq, v, headerlen, bufferP[headerlen], tunerM.GetId());
            headerlen = -1;
            }
         else
-           debug7("%s (%d) Received RTP packet #%d v=%d len=%d sync=0x%02X [device %d]", __PRETTY_FUNCTION__,
+           dbg_rtp_packet("%s (%d) Received RTP packet #%d v=%d len=%d sync=0x%02X [device %d]", __PRETTY_FUNCTION__,
                    lengthP, seq, v, headerlen, bufferP[headerlen], tunerM.GetId());
         }
      }
@@ -120,7 +120,7 @@ int cSatipRtp::GetHeaderLength(unsigned char *bufferP, unsigned int lengthP)
 
 void cSatipRtp::Process(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (bufferM) {
      unsigned int lenMsg[eRtpPacketReadCount];
      uint64_t elapsed;
@@ -139,13 +139,13 @@ void cSatipRtp::Process(void)
 
      elapsed = processing.Elapsed();
      if (elapsed > 1)
-        debug6("%s %d read(s) took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, count, elapsed, tunerM.GetId());
+        dbg_rtp_perf("%s %d read(s) took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, count, elapsed, tunerM.GetId());
      }
 }
 
 void cSatipRtp::Process(unsigned char *dataP, int lengthP)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (dataP && lengthP > 0) {
      uint64_t elapsed;
      cTimeMs processing(0);
@@ -155,7 +155,7 @@ void cSatipRtp::Process(unsigned char *dataP, int lengthP)
 
      elapsed = processing.Elapsed();
      if (elapsed > 1)
-        debug6("%s %d read(s) took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, lengthP, elapsed, tunerM.GetId());
+        dbg_rtp_perf("%s %d read(s) took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, lengthP, elapsed, tunerM.GetId());
      }
 }
 

@@ -37,7 +37,7 @@ static const char DESCRIPTION[] = trNOOP("SAT>IP Devices");
  ******************************************************************************/
 cPluginSatip::cPluginSatip(void) : deviceCountM(2), serversM(NULL)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Initialize any member variables here.
   // DON'T DO ANYTHING ELSE THAT MAY HAVE SIDE EFFECTS, REQUIRE GLOBAL
   // VDR OBJECTS TO EXIST OR PRODUCE ANY OUTPUT!
@@ -45,7 +45,7 @@ cPluginSatip::cPluginSatip(void) : deviceCountM(2), serversM(NULL)
 
 cPluginSatip::~cPluginSatip()
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Clean up after yourself!
 }
 
@@ -67,10 +67,10 @@ const char *cPluginSatip::MainMenuEntry(void)
 
 const char *cPluginSatip::CommandLineHelp(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Return a string that describes all known command line options.
   return "  -d <num>, --devices=<number>  set number of devices to be created\n"
-         "  -t <mode>, --trace=<mode>     set the tracing mode\n"
+         "  -t <mode>, --trace=<mode>     set the debug mode\n"
          "  -s <ipaddr>|<model>|<desc>, --server=[<srcaddress>@]<ipaddress>[:<port>]|<model>[:<filter>]|<description>[:<quirk>];...\n"
          "                                define hard-coded SAT>IP server(s)\n\n"
          "                                srcaddress (Optional)  Source address can be used to define used\n"
@@ -106,7 +106,7 @@ const char *cPluginSatip::CommandLineHelp(void)
 
 bool cPluginSatip::ProcessArgs(int argc, char *argv[])
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Implement command line argument processing here if applicable.
   static const struct option long_options[] = {
     { "devices",  required_argument, NULL, 'd' },
@@ -129,7 +129,7 @@ bool cPluginSatip::ProcessArgs(int argc, char *argv[])
            deviceCountM = strtol(optarg, NULL, 0);
            break;
       case 't':
-           SatipConfig.SetTraceMode(strtol(optarg, NULL, 0));
+           SatipConfig.SetDebugMode(strtol(optarg, NULL, 0));
            break;
       case 's':
            server = optarg;
@@ -163,7 +163,7 @@ bool cPluginSatip::ProcessArgs(int argc, char *argv[])
 
 bool cPluginSatip::Initialize(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Initialize any background activities the plugin shall perform.
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK)
      error("Unable to initialize CURL");
@@ -174,7 +174,7 @@ bool cPluginSatip::Initialize(void)
 
 bool cPluginSatip::Start(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Start any background activities the plugin shall perform.
   curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
   cString info = cString::sprintf("Using CURL %s", data->version);
@@ -189,7 +189,7 @@ bool cPluginSatip::Start(void)
 
 void cPluginSatip::Stop(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Stop any background activities the plugin is performing.
   cSatipDevice::Shutdown();
   cSatipDiscover::GetInstance()->Destroy();
@@ -199,54 +199,54 @@ void cPluginSatip::Stop(void)
 
 void cPluginSatip::Housekeeping(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Perform any cleanup or other regular tasks.
 }
 
 void cPluginSatip::MainThreadHook(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Perform actions in the context of the main program thread.
   // WARNING: Use with great care - see PLUGINS.html!
 }
 
 cString cPluginSatip::Active(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Return a message string if shutdown should be postponed
   return NULL;
 }
 
 time_t cPluginSatip::WakeupTime(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Return custom wakeup time for shutdown script
   return 0;
 }
 
 cOsdObject *cPluginSatip::MainMenuAction(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   // Perform the action when selected from the main VDR menu.
   return NULL;
 }
 
 cMenuSetupPage *cPluginSatip::SetupMenu(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Return a setup menu in case the plugin supports one.
   return new cSatipPluginSetup();
 }
 
 void cPluginSatip::ParseServer(const char *paramP)
 {
-  debug1("%s (%s)", __PRETTY_FUNCTION__, paramP);
+  dbg_funcname("%s (%s)", __PRETTY_FUNCTION__, paramP);
   int n = 0;
   char *s, *p = strdup(paramP);
   char *r = strtok_r(p, ";", &s);
   while (r) {
         r = skipspace(r);
-        debug3("%s server[%d]=%s", __PRETTY_FUNCTION__, n, r);
+        dbg_parsing("%s server[%d]=%s", __PRETTY_FUNCTION__, n, r);
         cString sourceAddr, serverAddr, serverModel, serverFilters, serverDescription;
         int serverQuirk = cSatipServer::eSatipQuirkNone;
         int serverPort = SATIP_DEFAULT_RTSP_PORT;
@@ -254,7 +254,7 @@ void cPluginSatip::ParseServer(const char *paramP)
         char *s2, *p2 = r;
         char *r2 = strtok_r(p2, "|", &s2);
         while (r2) {
-              debug3("%s param[%d]=%s", __PRETTY_FUNCTION__, n2, r2);
+              dbg_parsing("%s param[%d]=%s", __PRETTY_FUNCTION__, n2, r2);
               switch (n2++) {
                      case 0:
                           {
@@ -298,7 +298,7 @@ void cPluginSatip::ParseServer(const char *paramP)
               r2 = strtok_r(NULL, "|", &s2);
               }
         if (*serverAddr && *serverModel && *serverDescription) {
-           debug1("%s srcaddr=%s ipaddr=%s port=%d model=%s (%s) desc=%s (%d)", __PRETTY_FUNCTION__, *sourceAddr, *serverAddr, serverPort, *serverModel, *serverFilters, *serverDescription, serverQuirk);
+           dbg_funcname("%s srcaddr=%s ipaddr=%s port=%d model=%s (%s) desc=%s (%d)", __PRETTY_FUNCTION__, *sourceAddr, *serverAddr, serverPort, *serverModel, *serverFilters, *serverDescription, serverQuirk);
            if (!serversM)
               serversM = new cSatipDiscoverServers();
            serversM->Add(new cSatipDiscoverServer(*sourceAddr, *serverAddr, serverPort, *serverModel, *serverFilters, *serverDescription, serverQuirk));
@@ -342,13 +342,13 @@ void cPluginSatip::ParsePortRange(const char *paramP)
 
 int cPluginSatip::ParseCicams(const char *valueP, int *cicamsP)
 {
-  debug1("%s (%s,)", __PRETTY_FUNCTION__, valueP);
+  dbg_funcname("%s (%s,)", __PRETTY_FUNCTION__, valueP);
   int n = 0;
   char *s, *p = strdup(valueP);
   char *r = strtok_r(p, " ", &s);
   while (r) {
         r = skipspace(r);
-        debug3("%s cicams[%d]=%s", __PRETTY_FUNCTION__, n, r);
+        dbg_parsing("%s cicams[%d]=%s", __PRETTY_FUNCTION__, n, r);
         if (n < MAX_CICAM_COUNT) {
            cicamsP[n++] = atoi(r);
            }
@@ -360,13 +360,13 @@ int cPluginSatip::ParseCicams(const char *valueP, int *cicamsP)
 
 int cPluginSatip::ParseSources(const char *valueP, int *sourcesP)
 {
-  debug1("%s (%s,)", __PRETTY_FUNCTION__, valueP);
+  dbg_funcname("%s (%s,)", __PRETTY_FUNCTION__, valueP);
   int n = 0;
   char *s, *p = strdup(valueP);
   char *r = strtok_r(p, " ", &s);
   while (r) {
         r = skipspace(r);
-        debug3("%s sources[%d]=%s", __PRETTY_FUNCTION__, n, r);
+        dbg_parsing("%s sources[%d]=%s", __PRETTY_FUNCTION__, n, r);
         if (n < MAX_DISABLED_SOURCES_COUNT) {
            sourcesP[n++] = cSource::FromString(r);
            }
@@ -378,13 +378,13 @@ int cPluginSatip::ParseSources(const char *valueP, int *sourcesP)
 
 int cPluginSatip::ParseFilters(const char *valueP, int *filtersP)
 {
-  debug1("%s (%s,)", __PRETTY_FUNCTION__, valueP);
+  dbg_funcname("%s (%s,)", __PRETTY_FUNCTION__, valueP);
   char buffer[256];
   int n = 0;
   while (valueP && *valueP && (n < SECTION_FILTER_TABLE_SIZE)) {
     strn0cpy(buffer, valueP, sizeof(buffer));
     int i = atoi(buffer);
-    debug3("%s filters[%d]=%d", __PRETTY_FUNCTION__, n, i);
+    dbg_parsing("%s filters[%d]=%d", __PRETTY_FUNCTION__, n, i);
     if (i >= 0)
        filtersP[n++] = i;
     if ((valueP = strchr(valueP, ' ')) != NULL)
@@ -395,7 +395,7 @@ int cPluginSatip::ParseFilters(const char *valueP, int *filtersP)
 
 bool cPluginSatip::SetupParse(const char *nameP, const char *valueP)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   // Parse your own setup parameters and store their values.
   if (!strcasecmp(nameP, "OperatingMode"))
      SatipConfig.SetOperatingMode(atoi(valueP));
@@ -438,13 +438,13 @@ bool cPluginSatip::SetupParse(const char *nameP, const char *valueP)
 
 bool cPluginSatip::Service(const char *idP, void *dataP)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   return false;
 }
 
 const char **cPluginSatip::SVDRPHelpPages(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   static const char *HelpPages[] = {
     "INFO [ <page> ] [ <card index> ]\n"
     "    Prints SAT>IP device information and statistics.\n"
@@ -467,7 +467,7 @@ const char **cPluginSatip::SVDRPHelpPages(void)
     "DETA\n"
     "    Detachs active SAT>IP servers.\n",
     "TRAC [ <mode> ]\n"
-    "    Gets and/or sets used tracing mode.\n",
+    "    Gets and/or sets used debug mode.\n",
     NULL
     };
   return HelpPages;
@@ -475,7 +475,7 @@ const char **cPluginSatip::SVDRPHelpPages(void)
 
 cString cPluginSatip::SVDRPCommand(const char *commandP, const char *optionP, int &replyCodeP)
 {
-  debug1("%s (%s, %s,)", __PRETTY_FUNCTION__, commandP, optionP);
+  dbg_funcname("%s (%s, %s,)", __PRETTY_FUNCTION__, commandP, optionP);
   if (strcasecmp(commandP, "INFO") == 0) {
      int index = cDevice::ActualDevice()->CardIndex();
      int page = SATIP_DEVICE_INFO_ALL;
@@ -575,8 +575,8 @@ cString cPluginSatip::SVDRPCommand(const char *commandP, const char *optionP, in
      }
   else if (strcasecmp(commandP, "TRAC") == 0) {
      if (optionP && *optionP)
-        SatipConfig.SetTraceMode(strtol(optionP, NULL, 0));
-     return cString::sprintf("SATIP tracing mode: 0x%04X\n", SatipConfig.GetTraceMode());
+        SatipConfig.SetDebugMode(strtol(optionP, NULL, 0));
+     return cString::sprintf("SATIP debug mode: 0x%04X\n", SatipConfig.GetDebugMode());
      }
 
   return NULL;

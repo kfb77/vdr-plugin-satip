@@ -53,7 +53,7 @@ cSatipTuner::cSatipTuner(cSatipDeviceIf &deviceP, unsigned int packetLenP)
   delPidsM(),
   pidsM()
 {
-  debug1("%s (, %d) [device %d]", __PRETTY_FUNCTION__, packetLenP, deviceIdM);
+  dbg_funcname("%s (, %d) [device %d]", __PRETTY_FUNCTION__, packetLenP, deviceIdM);
 
   // Open sockets
   int i = SatipConfig.GetPortRangeStart() ? SatipConfig.GetPortRangeStop() - SatipConfig.GetPortRangeStart() - 1 : 100;
@@ -80,7 +80,7 @@ cSatipTuner::cSatipTuner(cSatipDeviceIf &deviceP, unsigned int packetLenP)
 
 cSatipTuner::~cSatipTuner()
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   // Stop thread
   sleepM.Signal();
@@ -100,7 +100,7 @@ cSatipTuner::~cSatipTuner()
 
 void cSatipTuner::Action(void)
 {
-  debug1("%s Entering [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s Entering [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   bool lastIdleStatus = false;
   cTimeMs idleCheck(eIdleCheckTimeoutMs);
@@ -111,15 +111,15 @@ void cSatipTuner::Action(void)
         UpdateCurrentState();
         switch (currentStateM) {
           case tsIdle:
-               debug4("%s: tsIdle [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+               dbg_tunerstate("%s: tsIdle [device %d]", __PRETTY_FUNCTION__, deviceIdM);
                break;
           case tsRelease:
-               debug4("%s: tsRelease [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+               dbg_tunerstate("%s: tsRelease [device %d]", __PRETTY_FUNCTION__, deviceIdM);
                Disconnect();
                RequestState(tsIdle, smInternal);
                break;
           case tsSet:
-               debug4("%s: tsSet [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+               dbg_tunerstate("%s: tsSet [device %d]", __PRETTY_FUNCTION__, deviceIdM);
                if (currentServerM.IsQuirk(cSatipServer::eSatipQuirkTearAndPlay))
                   Disconnect();
                if (Connect()) {
@@ -131,7 +131,7 @@ void cSatipTuner::Action(void)
                   Disconnect();
                break;
           case tsTuned:
-               debug4("%s: tsTuned [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+               dbg_tunerstate("%s: tsTuned [device %d]", __PRETTY_FUNCTION__, deviceIdM);
                deviceM->SetChannelTuned();
                reConnectM.Set(eConnectTimeoutMs);
                idleCheck.Set(eIdleCheckTimeoutMs);
@@ -154,7 +154,7 @@ void cSatipTuner::Action(void)
                   }
                break;
           case tsLocked:
-               debug4("%s: tsLocked [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+               dbg_tunerstate("%s: tsLocked [device %d]", __PRETTY_FUNCTION__, deviceIdM);
                if (!UpdatePids()) {
                   error("Pid update failed - retuning [device %d]", deviceIdM);
                   RequestState(tsSet, smInternal);
@@ -189,13 +189,13 @@ void cSatipTuner::Action(void)
         if (!StateRequested())
            sleepM.Wait(eSleepTimeoutMs); // to avoid busy loop and reduce cpu load
         }
-  debug1("%s Exiting [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s Exiting [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 }
 
 bool cSatipTuner::Open(void)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   // return always true
   return true;
@@ -204,7 +204,7 @@ bool cSatipTuner::Open(void)
 bool cSatipTuner::Close(void)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   if (setupTimeoutM.TimedOut())
      RequestState(tsRelease, smExternal);
@@ -216,7 +216,7 @@ bool cSatipTuner::Close(void)
 bool cSatipTuner::Connect(void)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   if (!isempty(*streamAddrM)) {
      cString connectionUri = GetBaseUrl(*streamAddrM, streamPortM);
@@ -224,11 +224,11 @@ bool cSatipTuner::Connect(void)
      // Just retune
      if (streamIdM >= 0) {
         if (!strcmp(*streamParamM, *lastParamM) && hasLockM) {
-           debug1("%s Identical parameters [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+           dbg_funcname("%s Identical parameters [device %d]", __PRETTY_FUNCTION__, deviceIdM);
            return true;
            }
         cString uri = cString::sprintf("%sstream=%d?%s", *connectionUri, streamIdM, *streamParamM);
-        debug1("%s Retuning [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+        dbg_funcname("%s Retuning [device %d]", __PRETTY_FUNCTION__, deviceIdM);
         if (rtspM.Play(*uri)) {
            keepAliveM.Set(timeoutM);
            lastParamM = streamParamM;
@@ -242,7 +242,7 @@ bool cSatipTuner::Connect(void)
         //rtpM.Flush();
         //rtcpM.Flush();
         if (useTcp)
-           debug1("%s Requesting TCP [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+           dbg_funcname("%s Requesting TCP [device %d]", __PRETTY_FUNCTION__, deviceIdM);
         if (rtspM.Setup(*uri, rtpM.Port(), rtcpM.Port(), useTcp)) {
            keepAliveM.Set(timeoutM);
            if (nextServerM.IsValid()) {
@@ -265,7 +265,7 @@ bool cSatipTuner::Connect(void)
 bool cSatipTuner::Disconnect(void)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
 
   if (!isempty(*lastAddrM) && (streamIdM >= 0)) {
      cString uri = cString::sprintf("%sstream=%d", *lastAddrM, streamIdM);
@@ -295,7 +295,7 @@ bool cSatipTuner::Disconnect(void)
 
 void cSatipTuner::ProcessVideoData(u_char *bufferP, int lengthP)
 {
-  debug16("%s (, %d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
+  dbg_funcname_ext("%s (, %d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
   if (lengthP > 0) {
      uint64_t elapsed;
      cTimeMs processing(0);
@@ -303,13 +303,13 @@ void cSatipTuner::ProcessVideoData(u_char *bufferP, int lengthP)
      AddTunerStatistic(lengthP);
      elapsed = processing.Elapsed();
      if (elapsed > 1)
-        debug6("%s AddTunerStatistic() took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, elapsed, deviceIdM);
+        dbg_rtp_perf("%s AddTunerStatistic() took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, elapsed, deviceIdM);
 
      processing.Set(0);
      deviceM->WriteData(bufferP, lengthP);
      elapsed = processing.Elapsed();
      if (elapsed > 1)
-        debug6("%s WriteData() took %" PRIu64 " ms [device %d]", __FUNCTION__, elapsed, deviceIdM);
+        dbg_rtp_perf("%s WriteData() took %" PRIu64 " ms [device %d]", __FUNCTION__, elapsed, deviceIdM);
      }
   reConnectM.Set(eConnectTimeoutMs);
 }
@@ -321,7 +321,7 @@ void cSatipTuner::ProcessRtpData(u_char *bufferP, int lengthP)
 
 void cSatipTuner::ProcessApplicationData(u_char *bufferP, int lengthP)
 {
-  debug16("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
+  dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
   // DVB-S2:
   // ver=<major>.<minor>;src=<srcID>;tuner=<feID>,<level>,<lock>,<quality>,<frequency>,<polarisation>,<system>,<type>,<pilots>,<roll_off>,<symbol_rate>,<fec_inner>;pids=<pid0>,...,<pidn>
   // DVB-T2:
@@ -331,7 +331,7 @@ void cSatipTuner::ProcessApplicationData(u_char *bufferP, int lengthP)
   if (lengthP > 0) {
      char s[lengthP];
      memcpy(s, (char *)bufferP, lengthP);
-     debug10("%s (%s) [device %d]", __PRETTY_FUNCTION__, s, deviceIdM);
+     dbg_rtcp("%s (%s) [device %d]", __PRETTY_FUNCTION__, s, deviceIdM);
      char *c = strstr(s, ";tuner=");
      if (c)  {
         int value;
@@ -381,14 +381,14 @@ void cSatipTuner::ProcessRtcpData(u_char *bufferP, int lengthP)
 void cSatipTuner::SetStreamId(int streamIdP)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s (%d) [device %d]", __PRETTY_FUNCTION__, streamIdP, deviceIdM);
+  dbg_funcname("%s (%d) [device %d]", __PRETTY_FUNCTION__, streamIdP, deviceIdM);
   streamIdM = streamIdP;
 }
 
 void cSatipTuner::SetSessionTimeout(const char *sessionP, int timeoutP)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s (%s, %d) [device %d]", __PRETTY_FUNCTION__, sessionP, timeoutP, deviceIdM);
+  dbg_funcname("%s (%s, %d) [device %d]", __PRETTY_FUNCTION__, sessionP, timeoutP, deviceIdM);
   sessionM = sessionP;
   if (nextServerM.IsQuirk(cSatipServer::eSatipQuirkSessionId) && !isempty(*sessionM) && startswith(*sessionM, "0"))
      rtspM.SetSession(SkipZeroes(*sessionM));
@@ -399,7 +399,7 @@ void cSatipTuner::SetSessionTimeout(const char *sessionP, int timeoutP)
 void cSatipTuner::SetupTransport(int rtpPortP, int rtcpPortP, const char *streamAddrP, const char *sourceAddrP)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s (%d, %d, %s, %s) [device %d]", __PRETTY_FUNCTION__, rtpPortP, rtcpPortP, streamAddrP, sourceAddrP, deviceIdM);
+  dbg_funcname("%s (%d, %d, %s, %s) [device %d]", __PRETTY_FUNCTION__, rtpPortP, rtcpPortP, streamAddrP, sourceAddrP, deviceIdM);
   bool multicast = !isempty(streamAddrP);
   // Adapt RTP to any transport media change
   if (multicast != rtpM.IsMulticast() || rtpPortP != rtpM.Port()) {
@@ -429,7 +429,7 @@ void cSatipTuner::SetupTransport(int rtpPortP, int rtcpPortP, const char *stream
 
 cString cSatipTuner::GetBaseUrl(const char *addressP, const int portP)
 {
-  debug16("%s (%s, %d) [device %d]", __PRETTY_FUNCTION__, addressP, portP, deviceIdM);
+  dbg_funcname_ext("%s (%s, %d) [device %d]", __PRETTY_FUNCTION__, addressP, portP, deviceIdM);
 
   if (portP != SATIP_DEFAULT_RTSP_PORT)
      return cString::sprintf("rtsp://%s:%d/", addressP, portP);
@@ -439,13 +439,13 @@ cString cSatipTuner::GetBaseUrl(const char *addressP, const int portP)
 
 int cSatipTuner::GetId(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return deviceIdM;
 }
 
 bool cSatipTuner::SetSource(cSatipServer *serverP, const int transponderP, const char *parameterP, const int indexP)
 {
-  debug1("%s (%d, %s, %d) [device %d]", __PRETTY_FUNCTION__, transponderP, parameterP, indexP, deviceIdM);
+  dbg_funcname("%s (%d, %s, %d) [device %d]", __PRETTY_FUNCTION__, transponderP, parameterP, indexP, deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (serverP) {
      nextServerM.Set(serverP, transponderP);
@@ -477,7 +477,7 @@ bool cSatipTuner::SetSource(cSatipServer *serverP, const int transponderP, const
 
 bool cSatipTuner::SetPid(int pidP, int typeP, bool onP)
 {
-  debug16("%s (%d, %d, %d) [device %d]", __PRETTY_FUNCTION__, pidP, typeP, onP, deviceIdM);
+  dbg_funcname_ext("%s (%d, %d, %d) [device %d]", __PRETTY_FUNCTION__, pidP, typeP, onP, deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (onP) {
      pidsM.AddPid(pidP);
@@ -489,7 +489,7 @@ bool cSatipTuner::SetPid(int pidP, int typeP, bool onP)
      delPidsM.AddPid(pidP);
      addPidsM.RemovePid(pidP);
      }
-  debug12("%s (%d, %d, %d) pids=%s [device %d]", __PRETTY_FUNCTION__, pidP, typeP, onP, *pidsM.ListPids(), deviceIdM);
+  dbg_pids("%s (%d, %d, %d) pids=%s [device %d]", __PRETTY_FUNCTION__, pidP, typeP, onP, *pidsM.ListPids(), deviceIdM);
   sleepM.Signal();
 
   return true;
@@ -497,7 +497,7 @@ bool cSatipTuner::SetPid(int pidP, int typeP, bool onP)
 
 bool cSatipTuner::UpdatePids(bool forceP)
 {
-  debug16("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
+  dbg_funcname_ext("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (((forceP && pidsM.Size()) || (pidUpdateCacheM.TimedOut() && (addPidsM.Size() || delPidsM.Size()))) &&
       !isempty(*streamAddrM) && (streamIdM > 0)) {
@@ -564,7 +564,7 @@ bool cSatipTuner::UpdatePids(bool forceP)
 
 bool cSatipTuner::Receive(void)
 {
-  debug16("%s tunerState=%s [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), deviceIdM);
+  dbg_funcname_ext("%s tunerState=%s [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (!isempty(*streamAddrM)) {
      cString uri = GetBaseUrl(*streamAddrM, streamPortM);
@@ -577,7 +577,7 @@ bool cSatipTuner::Receive(void)
 
 bool cSatipTuner::KeepAlive(bool forceP)
 {
-  debug16("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
+  dbg_funcname_ext("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (keepAliveM.TimedOut()) {
      keepAliveM.Set(timeoutM);
@@ -594,7 +594,7 @@ bool cSatipTuner::KeepAlive(bool forceP)
 
 bool cSatipTuner::ReadReceptionStatus(bool forceP)
 {
-  debug16("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
+  dbg_funcname_ext("%s (%d) tunerState=%s [device %d]", __PRETTY_FUNCTION__, forceP, TunerStateString(currentStateM), deviceIdM);
   cMutexLock MutexLock(&mutexM);
   if (statusUpdateM.TimedOut()) {
      statusUpdateM.Set(eStatusUpdateTimeoutMs);
@@ -611,7 +611,7 @@ bool cSatipTuner::ReadReceptionStatus(bool forceP)
 
 void cSatipTuner::UpdateCurrentState(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   cMutexLock MutexLock(&mutexM);
   eTunerState state = currentStateM;
 
@@ -625,7 +625,7 @@ void cSatipTuner::UpdateCurrentState(void)
      }
 
   if (currentStateM != state) {
-     debug1("%s: Switching from %s to %s [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), TunerStateString(state), deviceIdM);
+     dbg_funcname("%s: Switching from %s to %s [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), TunerStateString(state), deviceIdM);
      currentStateM = state;
      }
 }
@@ -633,7 +633,7 @@ void cSatipTuner::UpdateCurrentState(void)
 bool cSatipTuner::StateRequested(void)
 {
   cMutexLock MutexLock(&mutexM);
-  debug16("%s current=%s internal=%d external=%d [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), internalStateM.Size(), externalStateM.Size(), deviceIdM);
+  dbg_funcname_ext("%s current=%s internal=%d external=%d [device %d]", __PRETTY_FUNCTION__, TunerStateString(currentStateM), internalStateM.Size(), externalStateM.Size(), deviceIdM);
 
   return (internalStateM.Size() || externalStateM.Size());
 }
@@ -641,7 +641,7 @@ bool cSatipTuner::StateRequested(void)
 bool cSatipTuner::RequestState(eTunerState stateP, eStateMode modeP)
 {
   cMutexLock MutexLock(&mutexM);
-  debug1("%s (%s, %s) current=%s internal=%d external=%d [device %d]", __PRETTY_FUNCTION__, TunerStateString(stateP), StateModeString(modeP), TunerStateString(currentStateM), internalStateM.Size(), externalStateM.Size(), deviceIdM);
+  dbg_funcname("%s (%s, %s) current=%s internal=%d external=%d [device %d]", __PRETTY_FUNCTION__, TunerStateString(stateP), StateModeString(modeP), TunerStateString(currentStateM), internalStateM.Size(), externalStateM.Size(), deviceIdM);
 
   if (modeP == smExternal)
      externalStateM.Append(stateP);
@@ -705,42 +705,42 @@ const char *cSatipTuner::TunerStateString(eTunerState stateP)
 
 int cSatipTuner::FrontendId(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return frontendIdM;
 }
 
 int cSatipTuner::SignalStrength(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return signalStrengthM;
 }
 
 double cSatipTuner::SignalStrengthDBm(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return signalStrengthDBmM;
 }
 
 int cSatipTuner::SignalQuality(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return signalQualityM;
 }
 
 bool cSatipTuner::HasLock(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return (currentStateM >= tsTuned) && hasLockM;
 }
 
 cString cSatipTuner::GetSignalStatus(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return cString::sprintf("lock=%d strength=%d quality=%d frontend=%d", HasLock(), SignalStrength(), SignalQuality(), FrontendId());
 }
 
 cString cSatipTuner::GetInformation(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIdM);
   return (currentStateM >= tsTuned) ? cString::sprintf("%s?%s (%s) [stream=%d]", *GetBaseUrl(*streamAddrM, streamPortM), *streamParamM, *rtspM.GetActiveMode(), streamIdM) : "connection failed";
 }

@@ -59,7 +59,7 @@ bool cSatipFrontends::Attach(int deviceIdP, int transponderP)
   for (cSatipFrontend *f = First(); f; f = Next(f)) {
       if (f->Transponder() == transponderP) {
          f->Attach(deviceIdP);
-         debug9("%s (%d, %d) %s/#%d", __PRETTY_FUNCTION__, deviceIdP, transponderP, *f->Description(), f->Index());
+         dbg_chan_switch("%s (%d, %d) %s/#%d", __PRETTY_FUNCTION__, deviceIdP, transponderP, *f->Description(), f->Index());
          return true;
          }
       }
@@ -71,7 +71,7 @@ bool cSatipFrontends::Detach(int deviceIdP, int transponderP)
   for (cSatipFrontend *f = First(); f; f = Next(f)) {
       if (f->Transponder() == transponderP) {
          f->Detach(deviceIdP);
-         debug9("%s (%d, %d) %s/#%d", __PRETTY_FUNCTION__, deviceIdP, transponderP, *f->Description(), f->Index());
+         dbg_chan_switch("%s (%d, %d) %s/#%d", __PRETTY_FUNCTION__, deviceIdP, transponderP, *f->Description(), f->Index());
          return true;
          }
       }
@@ -109,7 +109,7 @@ cSatipServer::cSatipServer(const char *srcAddressP, const char *addressP, const 
         filtersM = "";
         for (unsigned int j = 0; j < i; ++j)
             filtersM = cString::sprintf("%s%s%s", *filtersM, isempty(*filtersM) ? "" : ",", *cSource::ToString(sourceFiltersM[j]));
-        debug3("%s filters=%s", __PRETTY_FUNCTION__, *filtersM);
+        dbg_parsing("%s filters=%s", __PRETTY_FUNCTION__, *filtersM);
         }
      FREE_POINTER(p);
      }
@@ -176,7 +176,7 @@ cSatipServer::cSatipServer(const char *srcAddressP, const char *addressP, const 
      quirksM = cString::sprintf("%s%sCiTnr", *quirksM, isempty(*quirksM) ? "" : ",");
   if ((quirkM & eSatipQuirkMask) & eSatipQuirkForcePilot)
      quirksM = cString::sprintf("%s%sForcePilot", *quirksM, isempty(*quirksM) ? "" : ",");
-  debug3("%s description=%s quirks=%s", __PRETTY_FUNCTION__, *descriptionM, *quirksM);
+  dbg_parsing("%s description=%s quirks=%s", __PRETTY_FUNCTION__, *descriptionM, *quirksM);
   // These devices support external CI
   if (strstr(*descriptionM, "OctopusNet") ||            // Digital Devices OctopusNet
       strstr(*descriptionM, "minisatip") ||             // minisatip server

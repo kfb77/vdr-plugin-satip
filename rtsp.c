@@ -26,13 +26,13 @@ cSatipRtsp::cSatipRtsp(cSatipTunerIf &tunerP)
   interleavedRtpIdM(0),
   interleavedRtcpIdM(1)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   Create();
 }
 
 cSatipRtsp::~cSatipRtsp()
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   Destroy();
 }
 
@@ -40,7 +40,7 @@ size_t cSatipRtsp::HeaderCallback(char *ptrP, size_t sizeP, size_t nmembP, void 
 {
   cSatipRtsp *obj = reinterpret_cast<cSatipRtsp *>(dataP);
   size_t len = sizeP * nmembP;
-  debug16("%s len=%zu", __PRETTY_FUNCTION__, len);
+  dbg_funcname_ext("%s len=%zu", __PRETTY_FUNCTION__, len);
 
   if (obj && (len > 0))
      obj->headerBufferM.Add(ptrP, len);
@@ -52,7 +52,7 @@ size_t cSatipRtsp::DataCallback(char *ptrP, size_t sizeP, size_t nmembP, void *d
 {
   cSatipRtsp *obj = reinterpret_cast<cSatipRtsp *>(dataP);
   size_t len = sizeP * nmembP;
-  debug16("%s len=%zu", __PRETTY_FUNCTION__, len);
+  dbg_funcname_ext("%s len=%zu", __PRETTY_FUNCTION__, len);
 
   if (obj)
      obj->dataBufferM.Add(ptrP, len);
@@ -64,7 +64,7 @@ size_t cSatipRtsp::InterleaveCallback(char *ptrP, size_t sizeP, size_t nmembP, v
 {
   cSatipRtsp *obj = reinterpret_cast<cSatipRtsp *>(dataP);
   size_t len = sizeP * nmembP;
-  debug16("%s len=%zu", __PRETTY_FUNCTION__, len);
+  dbg_funcname_ext("%s len=%zu", __PRETTY_FUNCTION__, len);
 
   if (obj && ptrP && len > 0) {
      char tag = ptrP[0] & 0xFF;
@@ -91,19 +91,19 @@ int cSatipRtsp::DebugCallback(CURL *handleP, curl_infotype typeP, char *dataP, s
   if (obj) {
      switch (typeP) {
        case CURLINFO_TEXT:
-            debug2("%s [device %d] RTSP INFO %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
+            dbg_curlinfo("%s [device %d] RTSP INFO %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
             break;
        case CURLINFO_HEADER_IN:
-            debug2("%s [device %d] RTSP HEAD <<< %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
+            dbg_curlinfo("%s [device %d] RTSP HEAD <<< %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
             break;
        case CURLINFO_HEADER_OUT:
-            debug2("%s [device %d] RTSP HEAD >>>\n%.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
+            dbg_curlinfo("%s [device %d] RTSP HEAD >>>\n%.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
             break;
        case CURLINFO_DATA_IN:
-            debug2("%s [device %d] RTSP DATA <<< %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
+            dbg_curlinfo("%s [device %d] RTSP DATA <<< %.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
             break;
        case CURLINFO_DATA_OUT:
-            debug2("%s [device %d] RTSP DATA >>>\n%.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
+            dbg_curlinfo("%s [device %d] RTSP DATA >>>\n%.*s", __PRETTY_FUNCTION__, obj->tunerM.GetId(), (int)sizeP, dataP);
             break;
        default:
             break;
@@ -130,7 +130,7 @@ cString cSatipRtsp::GetActiveMode(void)
 
 cString cSatipRtsp::RtspUnescapeString(const char *strP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, strP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, strP, tunerM.GetId());
   if (handleM) {
      char *p = curl_easy_unescape(handleM, strP, 0, NULL);
      cString s = p;
@@ -144,7 +144,7 @@ cString cSatipRtsp::RtspUnescapeString(const char *strP)
 
 void cSatipRtsp::Create(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (!handleM)
      handleM = curl_easy_init();
 
@@ -171,7 +171,7 @@ void cSatipRtsp::Create(void)
 
 void cSatipRtsp::Destroy(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (handleM) {
      // Cleanup curl stuff
      if (headerListM) {
@@ -185,14 +185,14 @@ void cSatipRtsp::Destroy(void)
 
 void cSatipRtsp::Reset(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   Destroy();
   Create();
 }
 
 bool cSatipRtsp::SetInterface(const char *bindAddrP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, bindAddrP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, bindAddrP, tunerM.GetId());
   bool result = true;
   CURLcode res = CURLE_OK;
 
@@ -208,7 +208,7 @@ bool cSatipRtsp::SetInterface(const char *bindAddrP)
 
 bool cSatipRtsp::Receive(const char *uriP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP) && modeM == cSatipConfig::eTransportModeRtpOverTcp) {
@@ -222,7 +222,7 @@ bool cSatipRtsp::Receive(const char *uriP)
      SATIP_CURL_EASY_PERFORM(handleM);
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -230,7 +230,7 @@ bool cSatipRtsp::Receive(const char *uriP)
 
 bool cSatipRtsp::Options(const char *uriP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP)) {
@@ -244,7 +244,7 @@ bool cSatipRtsp::Options(const char *uriP)
      SATIP_CURL_EASY_PERFORM(handleM);
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -252,7 +252,7 @@ bool cSatipRtsp::Options(const char *uriP)
 
 bool cSatipRtsp::Setup(const char *uriP, int rtpPortP, int rtcpPortP, bool useTcpP)
 {
-  debug1("%s (%s, %d, %d, %d) [device %d]", __PRETTY_FUNCTION__, uriP, rtpPortP, rtcpPortP, useTcpP, tunerM.GetId());
+  dbg_funcname("%s (%s, %d, %d, %d) [device %d]", __PRETTY_FUNCTION__, uriP, rtpPortP, rtcpPortP, useTcpP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP)) {
@@ -304,7 +304,7 @@ bool cSatipRtsp::Setup(const char *uriP, int rtpPortP, int rtcpPortP, bool useTc
         }
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s, %d, %d) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rtpPortP, rtcpPortP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s, %d, %d) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rtpPortP, rtcpPortP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -312,11 +312,11 @@ bool cSatipRtsp::Setup(const char *uriP, int rtpPortP, int rtcpPortP, bool useTc
 
 bool cSatipRtsp::SetSession(const char *sessionP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, sessionP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, sessionP, tunerM.GetId());
   if (handleM) {
      CURLcode res = CURLE_OK;
 
-     debug1("%s: session id quirk enabled [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+     dbg_funcname("%s: session id quirk enabled [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
      SATIP_CURL_EASY_SETOPT(handleM, CURLOPT_RTSP_SESSION_ID, sessionP);
      }
 
@@ -325,7 +325,7 @@ bool cSatipRtsp::SetSession(const char *sessionP)
 
 bool cSatipRtsp::Describe(const char *uriP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP)) {
@@ -346,7 +346,7 @@ bool cSatipRtsp::Describe(const char *uriP)
         }
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -354,7 +354,7 @@ bool cSatipRtsp::Describe(const char *uriP)
 
 bool cSatipRtsp::Play(const char *uriP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP)) {
@@ -375,7 +375,7 @@ bool cSatipRtsp::Play(const char *uriP)
         }
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -383,7 +383,7 @@ bool cSatipRtsp::Play(const char *uriP)
 
 bool cSatipRtsp::Teardown(const char *uriP)
 {
-  debug1("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
+  dbg_funcname("%s (%s) [device %d]", __PRETTY_FUNCTION__, uriP, tunerM.GetId());
   bool result = false;
 
   if (handleM && !isempty(uriP)) {
@@ -409,7 +409,7 @@ bool cSatipRtsp::Teardown(const char *uriP)
      SATIP_CURL_EASY_SETOPT(handleM, CURLOPT_RTSP_SESSION_ID, NULL);
 
      result = ValidateLatestResponse(&rc);
-     debug5("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
+     dbg_rtsp("%s (%s) Response %ld in %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, uriP, rc, processing.Elapsed(), tunerM.GetId());
      }
 
   return result;
@@ -417,12 +417,12 @@ bool cSatipRtsp::Teardown(const char *uriP)
 
 void cSatipRtsp::ParseHeader(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   char *s, *p = headerBufferM.Data();
   char *r = strtok_r(p, "\r\n", &s);
 
   while (r) {
-        debug16("%s (%zu): %s", __PRETTY_FUNCTION__, headerBufferM.Size(), r);
+        dbg_funcname_ext("%s (%zu): %s", __PRETTY_FUNCTION__, headerBufferM.Size(), r);
         r = skipspace(r);
         if (strstr(r, "com.ses.streamID")) {
            int streamid = -1;
@@ -473,18 +473,18 @@ void cSatipRtsp::ParseHeader(void)
 
 void cSatipRtsp::ParseData(void)
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   char *s, *p = dataBufferM.Data();
   char *r = strtok_r(p, "\r\n", &s);
 
   while (r) {
-        debug16("%s (%zu): %s", __PRETTY_FUNCTION__, dataBufferM.Size(), r);
+        dbg_funcname_ext("%s (%zu): %s", __PRETTY_FUNCTION__, dataBufferM.Size(), r);
         r = skipspace(r);
         if (strstr(r, "No-More:")) {
            char *tmp = NULL;
            if (sscanf(r, "No-More:%m[^;]", &tmp) == 1) {
               errorNoMoreM = skipspace(tmp);
-              debug3("%s No-More: %s [device %d]", __PRETTY_FUNCTION__, *errorNoMoreM, tunerM.GetId());
+              dbg_parsing("%s No-More: %s [device %d]", __PRETTY_FUNCTION__, *errorNoMoreM, tunerM.GetId());
               }
            FREE_POINTER(tmp);
            }
@@ -492,7 +492,7 @@ void cSatipRtsp::ParseData(void)
            char *tmp = NULL;
            if (sscanf(r, "Out-of-Range:%m[^;]", &tmp) == 1) {
               errorOutOfRangeM = skipspace(tmp);
-              debug3("%s Out-of-Range: %s [device %d]", __PRETTY_FUNCTION__, *errorOutOfRangeM, tunerM.GetId());
+              dbg_parsing("%s Out-of-Range: %s [device %d]", __PRETTY_FUNCTION__, *errorOutOfRangeM, tunerM.GetId());
               }
            FREE_POINTER(tmp);
            }
@@ -500,7 +500,7 @@ void cSatipRtsp::ParseData(void)
            char *tmp = NULL;
            if (sscanf(r, "Check-Syntax:%m[^;]", &tmp) == 1) {
               errorCheckSyntaxM = skipspace(tmp);
-              debug3("%s Check-Syntax: %s [device %d]", __PRETTY_FUNCTION__, *errorCheckSyntaxM, tunerM.GetId());
+              dbg_parsing("%s Check-Syntax: %s [device %d]", __PRETTY_FUNCTION__, *errorCheckSyntaxM, tunerM.GetId());
               }
            FREE_POINTER(tmp);
            }
@@ -562,7 +562,7 @@ bool cSatipRtsp::ValidateLatestResponse(long *rcP)
   errorNoMoreM = "";
   errorOutOfRangeM = "";
   errorCheckSyntaxM = "";
-  debug1("%s result=%s [device %d]", __PRETTY_FUNCTION__, result ? "ok" : "failed", tunerM.GetId());
+  dbg_funcname("%s result=%s [device %d]", __PRETTY_FUNCTION__, result ? "ok" : "failed", tunerM.GetId());
 
   return result;
 }

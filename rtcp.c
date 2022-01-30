@@ -15,7 +15,7 @@ cSatipRtcp::cSatipRtcp(cSatipTunerIf &tunerP)
   bufferLenM(eApplicationMaxSizeB),
   bufferM(MALLOC(unsigned char, bufferLenM))
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (bufferM)
      memset(bufferM, 0, bufferLenM);
   else
@@ -24,19 +24,19 @@ cSatipRtcp::cSatipRtcp(cSatipTunerIf &tunerP)
 
 cSatipRtcp::~cSatipRtcp()
 {
-  debug1("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   FREE_POINTER(bufferM);
 }
 
 int cSatipRtcp::GetFd(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   return Fd();
 }
 
 int cSatipRtcp::GetApplicationOffset(unsigned char *bufferP, int *lengthP)
 {
-  debug16("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP ? *lengthP : -1, tunerM.GetId());
+  dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP ? *lengthP : -1, tunerM.GetId());
   if (!lengthP)
      return -1;
   int offset = 0;
@@ -81,7 +81,7 @@ int cSatipRtcp::GetApplicationOffset(unsigned char *bufferP, int *lengthP)
 
 void cSatipRtcp::Process(void)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (bufferM) {
      int length;
      while ((length = Read(bufferM, bufferLenM)) > 0) {
@@ -94,7 +94,7 @@ void cSatipRtcp::Process(void)
 
 void cSatipRtcp::Process(unsigned char *dataP, int lengthP)
 {
-  debug16("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
+  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, tunerM.GetId());
   if (dataP && lengthP > 0) {
      int offset = GetApplicationOffset(dataP, &lengthP);
      if (offset >= 0)

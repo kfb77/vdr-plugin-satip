@@ -40,7 +40,7 @@ cSatipMsearch::~cSatipMsearch()
 
 void cSatipMsearch::Probe(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   if (!registeredM) {
      cSatipPoller::GetInstance()->Register(*this);
      registeredM = true;
@@ -58,17 +58,17 @@ int cSatipMsearch::GetFd(void)
 
 void cSatipMsearch::Process(void)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
   if (bufferM) {
      int length;
      while ((length = Read(bufferM, bufferLenM)) > 0) {
            bufferM[min(length, int(bufferLenM - 1))] = 0;
-           debug13("%s len=%d buf=%s", __PRETTY_FUNCTION__, length, bufferM);
+           dbg_msearch("%s len=%d buf=%s", __PRETTY_FUNCTION__, length, bufferM);
            bool status = false, valid = false;
            char *s, *p = reinterpret_cast<char *>(bufferM), *location = NULL;
            char *r = strtok_r(p, "\r\n", &s);
            while (r) {
-                 debug13("%s r=%s", __PRETTY_FUNCTION__, r);
+                 dbg_msearch("%s r=%s", __PRETTY_FUNCTION__, r);
                  // Check the status code
                  // HTTP/1.1 200 OK
                  if (!status && startswith(r, "HTTP/1.1 200 OK"))
@@ -78,7 +78,7 @@ void cSatipMsearch::Process(void)
                     // LOCATION: http://192.168.0.115:8888/octonet.xml
                     if (startswith(r, "LOCATION:")) {
                        location = compactspace(r + 9);
-                       debug1("%s location='%s'", __PRETTY_FUNCTION__, location);
+                       dbg_funcname("%s location='%s'", __PRETTY_FUNCTION__, location);
                        }
                     // Check the source type
                     // ST: urn:ses-com:device:SatIPServer:1
@@ -86,7 +86,7 @@ void cSatipMsearch::Process(void)
                        char *st = compactspace(r + 3);
                        if (strstr(st, "urn:ses-com:device:SatIPServer:1"))
                           valid = true;
-                       debug1("%s st='%s'", __PRETTY_FUNCTION__, st);
+                       dbg_funcname("%s st='%s'", __PRETTY_FUNCTION__, st);
                        }
                     // Check whether all the required data is found
                     if (valid && !isempty(location)) {
@@ -102,7 +102,7 @@ void cSatipMsearch::Process(void)
 
 void cSatipMsearch::Process(unsigned char *dataP, int lengthP)
 {
-  debug16("%s", __PRETTY_FUNCTION__);
+  dbg_funcname_ext("%s", __PRETTY_FUNCTION__);
 }
 
 cString cSatipMsearch::ToString(void) const

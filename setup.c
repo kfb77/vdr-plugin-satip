@@ -352,7 +352,7 @@ cSatipPluginSetup::cSatipPluginSetup()
   numDisabledSourcesM(SatipConfig.GetDisabledSourcesCount()),
   numDisabledFiltersM(SatipConfig.GetDisabledFiltersCount())
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   operatingModeTextsM[cSatipConfig::eOperatingModeOff]    = tr("off");
   operatingModeTextsM[cSatipConfig::eOperatingModeLow]    = tr("low");
   operatingModeTextsM[cSatipConfig::eOperatingModeNormal] = tr("normal");
@@ -442,7 +442,7 @@ void cSatipPluginSetup::Setup(void)
 
 eOSState cSatipPluginSetup::DeviceScan(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   cSatipDiscover::GetInstance()->TriggerScan();
 
   return osContinue;
@@ -450,7 +450,7 @@ eOSState cSatipPluginSetup::DeviceScan(void)
 
 eOSState cSatipPluginSetup::DeviceInfo(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   if (HasSubMenu() || Count() == 0)
      return osContinue;
 
@@ -463,7 +463,7 @@ eOSState cSatipPluginSetup::DeviceInfo(void)
 
 eOSState cSatipPluginSetup::ShowDeviceStatus(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   if (HasSubMenu() || Count() == 0)
      return osContinue;
 
@@ -472,7 +472,7 @@ eOSState cSatipPluginSetup::ShowDeviceStatus(void)
 
 eOSState cSatipPluginSetup::ShowInfo(void)
 {
-  debug1("%s", __PRETTY_FUNCTION__);
+  dbg_funcname("%s", __PRETTY_FUNCTION__);
   if (HasSubMenu() || Count() == 0)
      return osContinue;
 
@@ -533,7 +533,7 @@ void cSatipPluginSetup::StoreCicams(const char *nameP, int *cicamsP)
       else
          buffer = cString::sprintf("%d", cicamsP[i]);
       }
-  debug3("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
+  dbg_parsing("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
   SetupStore(nameP, *buffer);
 }
 
@@ -549,7 +549,7 @@ void cSatipPluginSetup::StoreSources(const char *nameP, int *sourcesP)
       else
          buffer = cString::sprintf("%s", *cSource::ToString(sourcesP[i]));
       }
-  debug3("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
+  dbg_parsing("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
   SetupStore(nameP, *buffer);
 }
 
@@ -565,7 +565,7 @@ void cSatipPluginSetup::StoreFilters(const char *nameP, int *valuesP)
       else
          buffer = cString::sprintf("%d", valuesP[i]);
       }
-  debug3("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
+  dbg_parsing("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, *buffer);
   SetupStore(nameP, *buffer);
 }
 

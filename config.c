@@ -13,7 +13,7 @@ cSatipConfig SatipConfig;
 
 cSatipConfig::cSatipConfig(void)
 : operatingModeM(eOperatingModeLow),
-  traceModeM(eTraceModeNormal),
+  debugModeM(DbgNormal),
   ciExtensionM(0),
   frontendReuseM(1),
   eitScanM(1),
