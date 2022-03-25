@@ -356,37 +356,43 @@ bool cSatipDevice::MaySwitchTransponder(const cChannel *channelP) const
   return cDevice::MaySwitchTransponder(channelP);
 }
 
-bool cSatipDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
+bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
 {
   cMutexLock MutexLock(&SetChannelMtx);  // Global lock to prevent any simultaneous zapping
-  dbg_chan_switch("%s (%d, %d) [device %u]", __PRETTY_FUNCTION__, channelP ? channelP->Number() : -1, liveViewP, deviceIndexM);
-  if (channelP) {
-     cDvbTransponderParameters dtp(channelP->Parameters());
-     cString params = GetTransponderUrlParameters(channelP);
+  dbg_chan_switch("%s (%d, %d) [device %u]",
+      __PRETTY_FUNCTION__, channel ? channel->Number() : -1, liveView, deviceIndexM);
+
+  if (pTunerM == nullptr) {
+     dbg_chan_switch("%s [device %u] -> false (no tuner)", deviceIndexM);
+     return false;
+     }
+
+  if (channel) {
+     cDvbTransponderParameters dtp(channel->Parameters());
+     cString params = GetTransponderUrlParameters(channel);
      if (isempty(params)) {
-        error("Unrecognized channel parameters: %s [device %u]", channelP->Parameters(), deviceIndexM);
+        error("Unrecognized channel parameters: %s [device %u]", channel->Parameters(), deviceIndexM);
         return false;
         }
      cString address;
-     cSatipServer *server = cSatipDiscover::GetInstance()->AssignServer(deviceIndexM, channelP->Source(), channelP->Transponder(), dtp.System());
+     cSatipServer *server = cSatipDiscover::GetInstance()->AssignServer(deviceIndexM, channel->Source(), channel->Transponder(), dtp.System());
      if (!server) {
         dbg_chan_switch("%s No suitable server found [device %u]", __PRETTY_FUNCTION__, deviceIndexM);
         return false;
         }
-     if (pTunerM && pTunerM->SetSource(server, channelP->Transponder(), *params, deviceIndexM)) {
-        channelM = *channelP;
+     if (pTunerM->SetSource(server, channel->Transponder(), *params, deviceIndexM)) {
+        channelM = *channel;
         deviceNameM = cString::sprintf("%s %d %s", *DeviceType(), deviceIndexM, *cSatipDiscover::GetInstance()->GetServerString(server));
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
         tunedM.TimedWait(SetChannelMtx, eTuningTimeoutMs);
         return true;
         }
      }
-  else if (pTunerM) {
+  else {
      pTunerM->SetSource(NULL, 0, NULL, deviceIndexM);
      deviceNameM = cString::sprintf("%s %d", *DeviceType(), deviceIndexM);
-     return true;
      }
-  return false;
+  return true;
 }
 
 void cSatipDevice::SetChannelTuned(void)

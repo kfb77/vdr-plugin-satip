@@ -81,7 +81,7 @@ public:
   virtual bool MaySwitchTransponder(const cChannel *channelP) const;
 
 protected:
-  virtual bool SetChannelDevice(const cChannel *channelP, bool liveViewP);
+  virtual bool SetChannelDevice(const cChannel* channel, bool liveView);
 
   // for recording
 private:
