@@ -90,9 +90,9 @@ public:
   cSatipServer(const char *srcAddressP, const char *addressP, const int portP, const char *modelP, const char *filtersP, const char *descriptionP, const int quirkP);
   virtual ~cSatipServer();
   virtual int Compare(const cListObject &listObjectP) const;
-  bool Assign(int deviceIdP, int sourceP, int systemP, int transponderP);
-  bool Matches(int sourceP);
-  bool Matches(int deviceIdP, int sourceP, int systemP, int transponderP);
+  bool Assign(int DeviceId, int Source, int DelSys, int Transponder);
+  bool Matches(int Source);
+  bool Matches(int DeviceId, int Source, int DelSys, int Transponder);
   void Attach(int deviceIdP, int transponderP);
   void Detach(int deviceIdP, int transponderP);
   int GetModulesDVBS2(void);

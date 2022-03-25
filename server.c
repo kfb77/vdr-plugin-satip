@@ -252,67 +252,73 @@ bool cSatipServer::IsValidSource(int sourceP)
   return true;
 }
 
-bool cSatipServer::Assign(int deviceIdP, int sourceP, int systemP, int transponderP)
-{
-  bool result = false;
-  if (IsValidSource(sourceP)) {
-     if (cSource::IsType(sourceP, 'S'))
-        result = frontendsM[eSatipFrontendDVBS2].Assign(deviceIdP, transponderP);
-     else if (cSource::IsType(sourceP, 'T')) {
-        if (systemP)
-           result = frontendsM[eSatipFrontendDVBT2].Assign(deviceIdP, transponderP);
-        else
-           result = frontendsM[eSatipFrontendDVBT].Assign(deviceIdP, transponderP) || frontendsM[eSatipFrontendDVBT2].Assign(deviceIdP, transponderP);
-        }
-     else if (cSource::IsType(sourceP, 'C')) {
-        if (systemP)
-           result = frontendsM[eSatipFrontendDVBC2].Assign(deviceIdP, transponderP);
-        else
-           result = frontendsM[eSatipFrontendDVBC].Assign(deviceIdP, transponderP) || frontendsM[eSatipFrontendDVBC2].Assign(deviceIdP, transponderP);
-        }
-     else if (cSource::IsType(sourceP, 'A'))
-        result = frontendsM[eSatipFrontendATSC].Assign(deviceIdP, transponderP);
-     }
-  return result;
-}
+bool cSatipServer::Assign(int DeviceId, int Source, int DelSys, int Transponder) {
+  if (not IsValidSource(Source))
+     return false;
 
-bool cSatipServer::Matches(int sourceP)
-{
-  if (IsValidSource(sourceP)) {
-     if (cSource::IsType(sourceP, 'S'))
-        return GetModulesDVBS2();
-     else if (cSource::IsType(sourceP, 'T'))
-        return GetModulesDVBT() || GetModulesDVBT2();
-     else if (cSource::IsType(sourceP, 'C'))
-        return GetModulesDVBC() || GetModulesDVBC2();
-     else if (cSource::IsType(sourceP, 'A'))
-        return GetModulesATSC();
+  switch((char) (Source >> 24)) {
+     case 'S':
+        return frontendsM[eSatipFrontendDVBS2].Assign(DeviceId, Transponder);
+     case 'T':
+        if (DelSys != 0)
+           return frontendsM[eSatipFrontendDVBT2].Assign(DeviceId, Transponder);
+        else
+           return frontendsM[eSatipFrontendDVBT].Assign(DeviceId, Transponder) ||
+                  frontendsM[eSatipFrontendDVBT2].Assign(DeviceId, Transponder);
+     case 'C':
+        if (DelSys != 0)
+           return frontendsM[eSatipFrontendDVBC2].Assign(DeviceId, Transponder);
+        else
+           return frontendsM[eSatipFrontendDVBC].Assign(DeviceId, Transponder) ||
+                  frontendsM[eSatipFrontendDVBC2].Assign(DeviceId, Transponder);
+     case 'A':
+        return frontendsM[eSatipFrontendATSC].Assign(DeviceId, Transponder);
+     default:;
      }
   return false;
 }
 
-bool cSatipServer::Matches(int deviceIdP, int sourceP, int systemP, int transponderP)
-{
-  bool result = false;
-  if (IsValidSource(sourceP)) {
-     if (cSource::IsType(sourceP, 'S'))
-        result = frontendsM[eSatipFrontendDVBS2].Matches(deviceIdP, transponderP);
-     else if (cSource::IsType(sourceP, 'T')) {
-        if (systemP)
-           result = frontendsM[eSatipFrontendDVBT2].Matches(deviceIdP, transponderP);
-        else
-           result = frontendsM[eSatipFrontendDVBT].Matches(deviceIdP, transponderP) || frontendsM[eSatipFrontendDVBT2].Matches(deviceIdP, transponderP);
-        }
-     else if (cSource::IsType(sourceP, 'C')) {
-        if (systemP)
-           result = frontendsM[eSatipFrontendDVBC2].Matches(deviceIdP, transponderP);
-        else
-           result = frontendsM[eSatipFrontendDVBC].Matches(deviceIdP, transponderP) || frontendsM[eSatipFrontendDVBC2].Matches(deviceIdP, transponderP);
-        }
-     else if (cSource::IsType(sourceP, 'A'))
-        result = frontendsM[eSatipFrontendATSC].Matches(deviceIdP, transponderP);
+bool cSatipServer::Matches(int Source) {
+  if (not IsValidSource(Source))
+     return false;
+
+  switch((char) (Source >> 24)) {
+     case 'S':
+        return GetModulesDVBS2();
+     case 'T':
+        return GetModulesDVBT() || GetModulesDVBT2();
+     case 'C':
+        return GetModulesDVBC() || GetModulesDVBC2();
+     case 'A':
+        return GetModulesATSC();
+     default:;
      }
-  return result;
+  return false;
+}
+
+bool cSatipServer::Matches(int DeviceId, int Source, int DelSys, int Transponder) {
+  if (not IsValidSource(Source))
+     return false;
+
+  switch((char) (Source >> 24)) {
+     case 'S':
+        return frontendsM[eSatipFrontendDVBS2].Matches(DeviceId, Transponder);
+     case 'T':
+        if (DelSys != 0)
+           return frontendsM[eSatipFrontendDVBT2].Matches(DeviceId, Transponder);
+        else
+           return frontendsM[eSatipFrontendDVBT].Matches(DeviceId, Transponder) ||
+                  frontendsM[eSatipFrontendDVBT2].Matches(DeviceId, Transponder);
+     case 'C':
+        if (DelSys != 0)
+           return frontendsM[eSatipFrontendDVBC2].Matches(DeviceId, Transponder);
+        else
+           return frontendsM[eSatipFrontendDVBC].Matches(DeviceId, Transponder) ||
+                  frontendsM[eSatipFrontendDVBC2].Matches(DeviceId, Transponder);
+     case 'A':
+        return frontendsM[eSatipFrontendATSC].Matches(DeviceId, Transponder);
+     }
+  return false;
 }
 
 void cSatipServer::Attach(int deviceIdP, int transponderP)
