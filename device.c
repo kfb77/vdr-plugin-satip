@@ -374,7 +374,7 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
         error("Unrecognized channel parameters: %s [device %u]", channel->Parameters(), deviceIndexM);
         return false;
         }
-     cString address;
+
      cSatipServer *server = cSatipDiscover::GetInstance()->AssignServer(deviceIndexM, channel->Source(), channel->Transponder(), dtp.System());
      if (!server) {
         dbg_chan_switch("%s No suitable server found [device %u]", __PRETTY_FUNCTION__, deviceIndexM);
