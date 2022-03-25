@@ -165,8 +165,8 @@ cString GetTransponderUrlParameters(const cChannel *channelP)
      // Scale down frequencies to MHz
      while (freq > 20000L)
            freq /= 1000L;
-#define ST(s) if (strchr(s, type) && (strchr(s, '0' + dtp.System() + 1) || strchr(s, '*')))
-#define STBUFLEFT (sizeof(buffer) - (q - buffer))
+     #define ST(s) if (strchr(s, type) && (strchr(s, '0' + dtp.System() + 1) || strchr(s, '*')))
+     #define STBUFLEFT (sizeof(buffer) - (q - buffer))
      ST(" S 1") { // to comply with SAT>IP protocol specification 1.2.2
        dtp.SetPilot(PILOT_OFF);
        dtp.SetModulation(QPSK);
@@ -202,7 +202,8 @@ cString GetTransponderUrlParameters(const cChannel *channelP)
      ST("   T2") q += PrintUrlString(q, STBUFLEFT, dtp.SisoMiso(),     SatipSisoMisoValues);
      ST(" C  1") q += PrintUrlString(q, STBUFLEFT, dtp.Inversion(),    SatipInversionValues);
      ST("A   *") q += PrintUrlString(q, STBUFLEFT, dtp.Inversion(),    SatipInversionValues);
-#undef ST
+     #undef ST
+     #undef STBUFLEFT
      return &buffer[1];
      }
   return NULL;
