@@ -46,14 +46,14 @@ public:
 
 class cSatipServer : public cListObject {
 private:
-  enum eSatipFrontend {
-    eSatipFrontendDVBS2 = 0,
-    eSatipFrontendDVBT,
-    eSatipFrontendDVBT2,
-    eSatipFrontendDVBC,
-    eSatipFrontendDVBC2,
-    eSatipFrontendATSC,
-    eSatipFrontendCount
+  enum delsys {
+    delsysDVBS2 = 0,
+    delsysDVBT,
+    delsysDVBT2,
+    delsysDVBC,
+    delsysDVBC2,
+    delsysATSC,
+    delsysCount
   };
   enum {
     eSatipMaxSourceFilters = 16
@@ -64,7 +64,7 @@ private:
   cString filtersM;
   cString descriptionM;
   cString quirksM;
-  cSatipFrontends frontendsM[eSatipFrontendCount];
+  cSatipFrontends frontendsM[delsysCount];
   int sourceFiltersM[eSatipMaxSourceFilters];
   int portM;
   int quirkM;

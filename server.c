@@ -191,32 +191,32 @@ cSatipServer::cSatipServer(const char *srcAddressP, const char *addressP, const 
         if (c = strstr(r, "DVBS2-")) {
            int count = atoi(c + 6);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendDVBS2].Add(new cSatipFrontend(i, "DVB-S2"));
+               frontendsM[delsysDVBS2].Add(new cSatipFrontend(i, "DVB-S2"));
            }
         else if (c = strstr(r, "DVBT-")) {
            int count = atoi(c + 5);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendDVBT].Add(new cSatipFrontend(i, "DVB-T"));
+               frontendsM[delsysDVBT].Add(new cSatipFrontend(i, "DVB-T"));
            }
         else if (c = strstr(r, "DVBT2-")) {
            int count = atoi(c + 6);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendDVBT2].Add(new cSatipFrontend(i, "DVB-T2"));
+               frontendsM[delsysDVBT2].Add(new cSatipFrontend(i, "DVB-T2"));
            }
         else if (c = strstr(r, "DVBC-")) {
            int count = atoi(c + 5);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendDVBC].Add(new cSatipFrontend(i, "DVB-C"));
+               frontendsM[delsysDVBC].Add(new cSatipFrontend(i, "DVB-C"));
            }
         else if (c = strstr(r, "DVBC2-")) {
            int count = atoi(c + 6);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendDVBC2].Add(new cSatipFrontend(i, "DVB-C2"));
+               frontendsM[delsysDVBC2].Add(new cSatipFrontend(i, "DVB-C2"));
            }
         else if (c = strstr(r, "ATSC-")) {
            int count = atoi(c + 5);
            for (int i = 1; i <= count; ++i)
-               frontendsM[eSatipFrontendATSC].Add(new cSatipFrontend(i, "ATSC"));
+               frontendsM[delsysATSC].Add(new cSatipFrontend(i, "ATSC"));
            }
         r = strtok_r(NULL, ",", &s);
         }
@@ -258,21 +258,21 @@ bool cSatipServer::Assign(int DeviceId, int Source, int DelSys, int Transponder)
 
   switch((char) (Source >> 24)) {
      case 'S':
-        return frontendsM[eSatipFrontendDVBS2].Assign(DeviceId, Transponder);
+        return frontendsM[delsysDVBS2].Assign(DeviceId, Transponder);
      case 'T':
         if (DelSys != 0)
-           return frontendsM[eSatipFrontendDVBT2].Assign(DeviceId, Transponder);
+           return frontendsM[delsysDVBT2].Assign(DeviceId, Transponder);
         else
-           return frontendsM[eSatipFrontendDVBT].Assign(DeviceId, Transponder) ||
-                  frontendsM[eSatipFrontendDVBT2].Assign(DeviceId, Transponder);
+           return frontendsM[delsysDVBT].Assign(DeviceId, Transponder) ||
+                  frontendsM[delsysDVBT2].Assign(DeviceId, Transponder);
      case 'C':
         if (DelSys != 0)
-           return frontendsM[eSatipFrontendDVBC2].Assign(DeviceId, Transponder);
+           return frontendsM[delsysDVBC2].Assign(DeviceId, Transponder);
         else
-           return frontendsM[eSatipFrontendDVBC].Assign(DeviceId, Transponder) ||
-                  frontendsM[eSatipFrontendDVBC2].Assign(DeviceId, Transponder);
+           return frontendsM[delsysDVBC].Assign(DeviceId, Transponder) ||
+                  frontendsM[delsysDVBC2].Assign(DeviceId, Transponder);
      case 'A':
-        return frontendsM[eSatipFrontendATSC].Assign(DeviceId, Transponder);
+        return frontendsM[delsysATSC].Assign(DeviceId, Transponder);
      default:;
      }
   return false;
@@ -302,28 +302,28 @@ bool cSatipServer::Matches(int DeviceId, int Source, int DelSys, int Transponder
 
   switch((char) (Source >> 24)) {
      case 'S':
-        return frontendsM[eSatipFrontendDVBS2].Matches(DeviceId, Transponder);
+        return frontendsM[delsysDVBS2].Matches(DeviceId, Transponder);
      case 'T':
         if (DelSys != 0)
-           return frontendsM[eSatipFrontendDVBT2].Matches(DeviceId, Transponder);
+           return frontendsM[delsysDVBT2].Matches(DeviceId, Transponder);
         else
-           return frontendsM[eSatipFrontendDVBT].Matches(DeviceId, Transponder) ||
-                  frontendsM[eSatipFrontendDVBT2].Matches(DeviceId, Transponder);
+           return frontendsM[delsysDVBT].Matches(DeviceId, Transponder) ||
+                  frontendsM[delsysDVBT2].Matches(DeviceId, Transponder);
      case 'C':
         if (DelSys != 0)
-           return frontendsM[eSatipFrontendDVBC2].Matches(DeviceId, Transponder);
+           return frontendsM[delsysDVBC2].Matches(DeviceId, Transponder);
         else
-           return frontendsM[eSatipFrontendDVBC].Matches(DeviceId, Transponder) ||
-                  frontendsM[eSatipFrontendDVBC2].Matches(DeviceId, Transponder);
+           return frontendsM[delsysDVBC].Matches(DeviceId, Transponder) ||
+                  frontendsM[delsysDVBC2].Matches(DeviceId, Transponder);
      case 'A':
-        return frontendsM[eSatipFrontendATSC].Matches(DeviceId, Transponder);
+        return frontendsM[delsysATSC].Matches(DeviceId, Transponder);
      }
   return false;
 }
 
 void cSatipServer::Attach(int deviceIdP, int transponderP)
 {
-  for (int i = 0; i < eSatipFrontendCount; ++i) {
+  for (int i = 0; i < delsysCount; ++i) {
       if (frontendsM[i].Attach(deviceIdP, transponderP))
          return;
       }
@@ -331,7 +331,7 @@ void cSatipServer::Attach(int deviceIdP, int transponderP)
 
 void cSatipServer::Detach(int deviceIdP, int transponderP)
 {
-  for (int i = 0; i < eSatipFrontendCount; ++i) {
+  for (int i = 0; i < delsysCount; ++i) {
       if (frontendsM[i].Detach(deviceIdP, transponderP))
          return;
       }
@@ -339,32 +339,32 @@ void cSatipServer::Detach(int deviceIdP, int transponderP)
 
 int cSatipServer::GetModulesDVBS2(void)
 {
-  return frontendsM[eSatipFrontendDVBS2].Count();
+  return frontendsM[delsysDVBS2].Count();
 }
 
 int cSatipServer::GetModulesDVBT(void)
 {
-  return frontendsM[eSatipFrontendDVBT].Count();
+  return frontendsM[delsysDVBT].Count();
 }
 
 int cSatipServer::GetModulesDVBT2(void)
 {
-  return frontendsM[eSatipFrontendDVBT2].Count();
+  return frontendsM[delsysDVBT2].Count();
 }
 
 int cSatipServer::GetModulesDVBC(void)
 {
-  return frontendsM[eSatipFrontendDVBC].Count();
+  return frontendsM[delsysDVBC].Count();
 }
 
 int cSatipServer::GetModulesDVBC2(void)
 {
-  return frontendsM[eSatipFrontendDVBC2].Count();
+  return frontendsM[delsysDVBC2].Count();
 }
 
 int cSatipServer::GetModulesATSC(void)
 {
-  return frontendsM[eSatipFrontendATSC].Count();
+  return frontendsM[delsysATSC].Count();
 }
 
 // --- cSatipServers ----------------------------------------------------------
