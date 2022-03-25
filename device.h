@@ -37,7 +37,7 @@ private:
   cString deviceNameM;
   cChannel channelM;
   cRingBufferLinear *tsBufferM;
-  cSatipTuner *pTunerM;
+  cSatipTuner* tuner;
   cSatipSectionFilterHandler *pSectionFilterHandlerM;
   cTimeMs createdM;
   cCondVar tunedM;
