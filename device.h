@@ -18,7 +18,6 @@
 class cSatipDevice : public cDevice, public cSatipPidStatistics, public cSatipBufferStatistics, public cSatipDeviceIf {
   // static ones
 public:
-  static cMutex mutexS;
   static bool Initialize(unsigned int DeviceCount);
   static void Shutdown(void);
   static unsigned int Count(void);
@@ -51,6 +50,7 @@ public:
 
   // copy and assignment constructors
 private:
+  static cMutex SetChannelMtx;
   cSatipDevice(const cSatipDevice&);
   cSatipDevice& operator=(const cSatipDevice&);
 

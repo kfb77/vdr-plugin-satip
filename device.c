@@ -15,7 +15,7 @@
 
 static cSatipDevice * SatipDevicesS[SATIP_MAX_DEVICES] = { NULL };
 
-cMutex cSatipDevice::mutexS = cMutex();
+cMutex cSatipDevice::SetChannelMtx = cMutex();
 
 cSatipDevice::cSatipDevice(unsigned int indexP)
 : deviceIndexM(indexP),
@@ -358,7 +358,7 @@ bool cSatipDevice::MaySwitchTransponder(const cChannel *channelP) const
 
 bool cSatipDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
 {
-  cMutexLock MutexLock(&mutexS);  // Global lock to prevent any simultaneous zapping
+  cMutexLock MutexLock(&SetChannelMtx);  // Global lock to prevent any simultaneous zapping
   dbg_chan_switch("%s (%d, %d) [device %u]", __PRETTY_FUNCTION__, channelP ? channelP->Number() : -1, liveViewP, deviceIndexM);
   if (channelP) {
      cDvbTransponderParameters dtp(channelP->Parameters());
@@ -377,7 +377,7 @@ bool cSatipDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
         channelM = *channelP;
         deviceNameM = cString::sprintf("%s %d %s", *DeviceType(), deviceIndexM, *cSatipDiscover::GetInstance()->GetServerString(server));
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
-        tunedM.TimedWait(mutexS, eTuningTimeoutMs);
+        tunedM.TimedWait(SetChannelMtx, eTuningTimeoutMs);
         return true;
         }
      }
