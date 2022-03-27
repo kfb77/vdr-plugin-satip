@@ -18,7 +18,7 @@
 class cSatipDevice : public cDevice, public cSatipPidStatistics, public cSatipBufferStatistics, public cSatipDeviceIf {
   // static ones
 public:
-  static bool Initialize(unsigned int DeviceCount);
+  static bool Initialize(int DeviceCount);
   static void Shutdown(void);
   static unsigned int Count(void);
   static cSatipDevice *GetSatipDevice(int CardIndex);
