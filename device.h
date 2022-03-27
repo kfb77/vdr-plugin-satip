@@ -37,7 +37,7 @@ private:
   cChannel channelM;
   cRingBufferLinear *tsBufferM;
   cSatipTuner* tuner;
-  cSatipSectionFilterHandler *pSectionFilterHandlerM;
+  cSatipSectionFilterHandler* SectionFilterHandler;
   cTimeMs ReadyTimeout;
   cCondVar tunerLocked;
 

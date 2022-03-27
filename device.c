@@ -37,7 +37,7 @@ cSatipDevice::cSatipDevice(unsigned int indexP)
      tuner = new cSatipTuner(*this, tsBufferM->Free());
      }
   // Start section handler
-  pSectionFilterHandlerM = new cSatipSectionFilterHandler(deviceIndex, bufsize + 1);
+  SectionFilterHandler = new cSatipSectionFilterHandler(deviceIndex, bufsize + 1);
   StartSectionHandler();
 }
 
@@ -48,7 +48,7 @@ cSatipDevice::~cSatipDevice()
   tunerLocked.Broadcast();
   // Stop section handler
   StopSectionHandler();
-  DELETE_POINTER(pSectionFilterHandlerM);
+  DELETE_POINTER(SectionFilterHandler);
   DELETE_POINTER(tuner);
   DELETE_POINTER(tsBufferM);
 }
@@ -156,7 +156,7 @@ cString cSatipDevice::GetPidsInformation(void)
 cString cSatipDevice::GetFiltersInformation(void)
 {
   dbg_funcname_ext("%s [device %u]", __PRETTY_FUNCTION__, deviceIndex);
-  return cString::sprintf("Active section filters:\n%s", pSectionFilterHandlerM ? *pSectionFilterHandlerM->GetInformation() : "");
+  return cString::sprintf("Active section filters:\n%s", SectionFilterHandler ? *SectionFilterHandler->GetInformation() : "");
 }
 
 cString cSatipDevice::GetInformation(unsigned int pageP)
@@ -405,7 +405,7 @@ bool cSatipDevice::SetPid(cPidHandle *handleP, int typeP, bool onP)
   if (tuner && handleP && handleP->pid >= 0 && handleP->pid <= 8191) {
      if (onP)
         return tuner->SetPid(handleP->pid, typeP, true);
-     else if (!handleP->used && pSectionFilterHandlerM && !pSectionFilterHandlerM->Exists(handleP->pid))
+     else if (!handleP->used && SectionFilterHandler && !SectionFilterHandler->Exists(handleP->pid))
         return tuner->SetPid(handleP->pid, typeP, false);
      }
   return true;
@@ -414,8 +414,8 @@ bool cSatipDevice::SetPid(cPidHandle *handleP, int typeP, bool onP)
 int cSatipDevice::OpenFilter(u_short pidP, u_char tidP, u_char maskP)
 {
   dbg_pids("%s (%d, %02X, %02X) [device %d]", __PRETTY_FUNCTION__, pidP, tidP, maskP, deviceIndex);
-  if (pSectionFilterHandlerM) {
-     int handle = pSectionFilterHandlerM->Open(pidP, tidP, maskP);
+  if (SectionFilterHandler) {
+     int handle = SectionFilterHandler->Open(pidP, tidP, maskP);
      if (tuner && (handle >= 0))
         tuner->SetPid(pidP, ptOther, true);
      return handle;
@@ -425,12 +425,12 @@ int cSatipDevice::OpenFilter(u_short pidP, u_char tidP, u_char maskP)
 
 void cSatipDevice::CloseFilter(int handleP)
 {
-  if (pSectionFilterHandlerM) {
-     int pid = pSectionFilterHandlerM->GetPid(handleP);
+  if (SectionFilterHandler) {
+     int pid = SectionFilterHandler->GetPid(handleP);
      dbg_pids("%s (%d) [device %u]", __PRETTY_FUNCTION__, pid, deviceIndex);
      if (tuner)
         tuner->SetPid(pid, ptOther, false);
-     pSectionFilterHandlerM->Close(handleP);
+     SectionFilterHandler->Close(handleP);
      }
 }
 
@@ -483,8 +483,8 @@ void cSatipDevice::WriteData(uchar *bufferP, int lengthP)
         tsBufferM->ReportOverflow(lengthP - len);
      }
   // Filter the sections
-  if (pSectionFilterHandlerM)
-     pSectionFilterHandlerM->Write(bufferP, lengthP);
+  if (SectionFilterHandler)
+     SectionFilterHandler->Write(bufferP, lengthP);
 }
 
 int cSatipDevice::GetId(void)
