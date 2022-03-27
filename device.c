@@ -5,6 +5,7 @@
  *
  */
 #include <string>     // std::string
+#include <vector>     // std::vector
 #include <algorithm>  // std::min()
 #include <vdr/menu.h> // cRecordControl
 
@@ -14,7 +15,7 @@
 #include "param.h"
 #include "device.h"
 
-static cSatipDevice * SatipDevicesS[SATIP_MAX_DEVICES] = { NULL };
+std::vector<cSatipDevice*> SatipDevices;
 
 cMutex cSatipDevice::SetChannelMtx = cMutex();
 
@@ -58,40 +59,28 @@ cSatipDevice::~cSatipDevice() {
 bool cSatipDevice::Initialize(int DeviceCount) {
   dbg_funcname("%s (%d)", __PRETTY_FUNCTION__, DeviceCount);
   DeviceCount = std::min(DeviceCount, SATIP_MAX_DEVICES);
+  SatipDevices.reserve(DeviceCount);
   for(int i = 0; i < DeviceCount; i++)
-     SatipDevicesS[i] = new cSatipDevice(i);
-  for(int i = DeviceCount; i < SATIP_MAX_DEVICES; i++)
-     SatipDevicesS[i] = nullptr;
+     SatipDevices.push_back(new cSatipDevice(i));
   return true;
 }
 
 void cSatipDevice::Shutdown(void) {
   dbg_funcname("%s", __PRETTY_FUNCTION__);
-  for(int i = 0; SatipDevicesS[i]; i++)
-     SatipDevicesS[i]->CloseDvr();
+  for(auto device:SatipDevices)
+     device->CloseDvr();
 }
 
-unsigned int cSatipDevice::Count(void)
-{
-  unsigned int count = 0;
-  dbg_funcname("%s", __PRETTY_FUNCTION__);
-  for (unsigned int i = 0; i < SATIP_MAX_DEVICES; ++i) {
-      if (SatipDevicesS[i] != NULL)
-         count++;
-      }
-  return count;
+size_t cSatipDevice::Count(void) {
+  return SatipDevices.size();
 }
 
-cSatipDevice *cSatipDevice::GetSatipDevice(int cardIndexP)
-{
-  dbg_funcname_ext("%s (%d)", __PRETTY_FUNCTION__, cardIndexP);
-  for (unsigned int i = 0; i < SATIP_MAX_DEVICES; ++i) {
-      if (SatipDevicesS[i] && (SatipDevicesS[i]->CardIndex() == cardIndexP)) {
-         dbg_funcname_ext("%s (%d): Found!", __PRETTY_FUNCTION__, cardIndexP);
-         return SatipDevicesS[i];
-         }
-      }
-  return NULL;
+cSatipDevice* cSatipDevice::GetSatipDevice(int cardIndex) {
+  dbg_funcname_ext("%s (%d)", __PRETTY_FUNCTION__, cardIndex);
+  for(auto device:SatipDevices)
+     if (device->CardIndex() == cardIndex)
+        return device;
+  return nullptr;
 }
 
 cString cSatipDevice::GetSatipStatus(void)
