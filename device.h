@@ -30,7 +30,7 @@ private:
     eReadyTimeoutMs  = 2000, // in milliseconds
     eTuningTimeoutMs = 1000  // in milliseconds
   };
-  unsigned int deviceIndexM;
+  unsigned int deviceIndex;
   int bytesDeliveredM;
   bool isOpenDvrM;
   bool checkTsBufferM;
