@@ -175,15 +175,12 @@ cString cSatipDevice::GetInformation(unsigned int pageP)
   return s;
 }
 
-bool cSatipDevice::Ready(void)
-{
+bool cSatipDevice::Ready(void) {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
-  return ((cSatipDiscover::GetInstance()->GetServerCount() > 0) || (ReadyTimeout.Elapsed() > eReadyTimeoutMs));
+  return (cSatipDiscover::GetInstance()->GetServerCount() > 0) or (ReadyTimeout.Elapsed() > eReadyTimeoutMs);
 }
 
-cString cSatipDevice::DeviceType(void) const
-{
-  dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
+cString cSatipDevice::DeviceType(void) const {
   return "SAT>IP";
 }
 
