@@ -23,6 +23,7 @@ cSatipDevice::cSatipDevice(unsigned int indexP)
   isOpenDvrM(false),
   checkTsBufferM(false),
   currentChannel(),
+  SectionFilterHandler(nullptr),
   ReadyTimeout(0),
   tunerLocked()
 {
@@ -34,10 +35,11 @@ cSatipDevice::cSatipDevice(unsigned int indexP)
      tsBuffer->SetTimeouts(10, 10);
      tsBuffer->SetIoThrottle();
      tuner = new cSatipTuner(*this, tsBuffer->Free());
+
+     // Start section handler
+     SectionFilterHandler = new cSatipSectionFilterHandler(deviceIndex, bufsize + 1);
+     StartSectionHandler();
      }
-  // Start section handler
-  SectionFilterHandler = new cSatipSectionFilterHandler(deviceIndex, bufsize + 1);
-  StartSectionHandler();
 }
 
 cSatipDevice::~cSatipDevice()
