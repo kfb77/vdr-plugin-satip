@@ -39,7 +39,7 @@ private:
   cSatipTuner* tuner;
   cSatipSectionFilterHandler *pSectionFilterHandlerM;
   cTimeMs createdM;
-  cCondVar tunedM;
+  cCondVar tunerLocked;
 
   // constructor & destructor
 public:

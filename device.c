@@ -24,7 +24,7 @@ cSatipDevice::cSatipDevice(unsigned int indexP)
   checkTsBufferM(false),
   channelM(),
   createdM(0),
-  tunedM()
+  tunerLocked()
 {
   unsigned int bufsize = (unsigned int)SATIP_BUFFER_SIZE;
   bufsize -= (bufsize % TS_SIZE);
@@ -45,7 +45,7 @@ cSatipDevice::~cSatipDevice()
 {
   dbg_funcname("%s [device %u]", __PRETTY_FUNCTION__, deviceIndex);
   // Release immediately any pending conditional wait
-  tunedM.Broadcast();
+  tunerLocked.Broadcast();
   // Stop section handler
   StopSectionHandler();
   DELETE_POINTER(pSectionFilterHandlerM);
@@ -382,7 +382,7 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
      if (tuner->SetSource(server, channel->Transponder(), params.c_str(), deviceIndex)) {
         channelM = *channel;
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
-        tunedM.TimedWait(SetChannelMtx, eTuningTimeoutMs);
+        tunerLocked.TimedWait(SetChannelMtx, eTuningTimeoutMs);
         return true;
         }
      }
@@ -396,7 +396,7 @@ void cSatipDevice::SetChannelTuned(void)
 {
   dbg_chan_switch("%s () [device %u]", __PRETTY_FUNCTION__, deviceIndex);
   // Release immediately any pending conditional wait
-  tunedM.Broadcast();
+  tunerLocked.Broadcast();
 }
 
 bool cSatipDevice::SetPid(cPidHandle *handleP, int typeP, bool onP)
