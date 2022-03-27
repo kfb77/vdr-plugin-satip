@@ -65,13 +65,10 @@ bool cSatipDevice::Initialize(int DeviceCount) {
   return true;
 }
 
-void cSatipDevice::Shutdown(void)
-{
+void cSatipDevice::Shutdown(void) {
   dbg_funcname("%s", __PRETTY_FUNCTION__);
-  for (int i = 0; i < SATIP_MAX_DEVICES; ++i) {
-      if (SatipDevicesS[i])
-         SatipDevicesS[i]->CloseDvr();
-      }
+  for(int i = 0; SatipDevicesS[i]; i++)
+     SatipDevicesS[i]->CloseDvr();
 }
 
 unsigned int cSatipDevice::Count(void)
