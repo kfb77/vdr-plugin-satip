@@ -43,13 +43,13 @@ cSatipDevice::cSatipDevice(unsigned int DeviceIndex) :
      }
 }
 
-cSatipDevice::~cSatipDevice()
-{
+cSatipDevice::~cSatipDevice() {
   dbg_funcname("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   // Release immediately any pending conditional wait
   tunerLocked.Broadcast();
   // Stop section handler
-  StopSectionHandler();
+  if (SectionFilterHandler)
+     StopSectionHandler();
   DELETE_POINTER(SectionFilterHandler);
   DELETE_POINTER(tuner);
   DELETE_POINTER(tsBuffer);
