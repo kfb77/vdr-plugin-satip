@@ -34,8 +34,8 @@ private:
   int bytesDelivered;
   bool isOpenDvrM;
   bool checkTsBufferM;
-  cChannel channelM;
-  cRingBufferLinear *tsBufferM;
+  cChannel currentChannel;
+  cRingBufferLinear *tsBuffer;
   cSatipTuner* tuner;
   cSatipSectionFilterHandler* SectionFilterHandler;
   cTimeMs ReadyTimeout;
