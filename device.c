@@ -28,7 +28,7 @@ cSatipDevice::cSatipDevice(unsigned int DeviceIndex) :
   ReadyTimeout(0),
   tunerLocked()
 {
-  unsigned int bufsize = (unsigned int)SATIP_BUFFER_SIZE;
+  size_t bufsize = SATIP_BUFFER_SIZE;
   bufsize -= (bufsize % TS_SIZE);
   info("Creating device CardIndex=%d DeviceNumber=%d [device %d]", CardIndex(), DeviceNumber(), deviceIndex);
   tsBuffer = new cRingBufferLinear(bufsize + 1, TS_SIZE);
