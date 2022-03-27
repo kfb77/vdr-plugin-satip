@@ -22,7 +22,6 @@ cSatipDevice::cSatipDevice(unsigned int indexP)
   bytesDelivered(0),
   isOpenDvrM(false),
   checkTsBufferM(false),
-  deviceNameM(*cString::sprintf("%s %d", *DeviceType(), deviceIndex)),
   channelM(),
   createdM(0),
   tunedM()
@@ -382,7 +381,6 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
         }
      if (tuner->SetSource(server, channel->Transponder(), params.c_str(), deviceIndex)) {
         channelM = *channel;
-        deviceNameM = cString::sprintf("%s %d %s", *DeviceType(), deviceIndex, *cSatipDiscover::GetInstance()->GetServerString(server));
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
         tunedM.TimedWait(SetChannelMtx, eTuningTimeoutMs);
         return true;
@@ -390,7 +388,6 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
      }
   else {
      tuner->SetSource(NULL, 0, NULL, deviceIndex);
-     deviceNameM = cString::sprintf("%s %d", *DeviceType(), deviceIndex);
      }
   return true;
 }

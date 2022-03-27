@@ -34,7 +34,6 @@ private:
   int bytesDelivered;
   bool isOpenDvrM;
   bool checkTsBufferM;
-  cString deviceNameM;
   cChannel channelM;
   cRingBufferLinear *tsBufferM;
   cSatipTuner* tuner;
