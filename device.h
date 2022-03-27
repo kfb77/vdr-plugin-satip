@@ -38,7 +38,7 @@ private:
   cRingBufferLinear *tsBufferM;
   cSatipTuner* tuner;
   cSatipSectionFilterHandler *pSectionFilterHandlerM;
-  cTimeMs createdM;
+  cTimeMs ReadyTimeout;
   cCondVar tunerLocked;
 
   // constructor & destructor
