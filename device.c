@@ -369,8 +369,8 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
 
   if (channel) {
      cDvbTransponderParameters dtp(channel->Parameters());
-     cString params = GetTransponderUrlParameters(channel);
-     if (isempty(params)) {
+     std::string params = GetTransponderUrlParameters(channel);
+     if (params.empty()) {
         error("Unrecognized channel parameters: %s [device %u]", channel->Parameters(), deviceIndexM);
         return false;
         }
@@ -380,7 +380,7 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
         dbg_chan_switch("%s No suitable server found [device %u]", __PRETTY_FUNCTION__, deviceIndexM);
         return false;
         }
-     if (tuner->SetSource(server, channel->Transponder(), *params, deviceIndexM)) {
+     if (tuner->SetSource(server, channel->Transponder(), params.c_str(), deviceIndexM)) {
         channelM = *channel;
         deviceNameM = cString::sprintf("%s %d %s", *DeviceType(), deviceIndexM, *cSatipDiscover::GetInstance()->GetServerString(server));
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
@@ -525,7 +525,7 @@ int cSatipDevice::GetCISlot(void)
 cString cSatipDevice::GetTnrParameterString(void)
 {
    if (channelM.Ca())
-      return GetTnrUrlParameters(&channelM);
+      return GetTnrUrlParameters(&channelM).c_str();
    return NULL;
 }
 

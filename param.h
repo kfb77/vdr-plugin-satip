@@ -5,12 +5,9 @@
  *
  */
 
-#ifndef __SATIP_PARAM_H
-#define __SATIP_PARAM_H
+#pragma once
 
-#include "common.h"
+#include <string>
 
-cString GetTransponderUrlParameters(const cChannel *channelP);
-cString GetTnrUrlParameters(const cChannel *channelP);
-
-#endif // __SATIP_PARAM_H
+std::string GetTransponderUrlParameters(const cChannel* channel);
+std::string GetTnrUrlParameters(const cChannel* channel);
