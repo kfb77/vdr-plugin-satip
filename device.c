@@ -19,7 +19,7 @@ cMutex cSatipDevice::SetChannelMtx = cMutex();
 
 cSatipDevice::cSatipDevice(unsigned int indexP)
 : deviceIndex(indexP),
-  bytesDeliveredM(0),
+  bytesDelivered(0),
   isOpenDvrM(false),
   checkTsBufferM(false),
   deviceNameM(*cString::sprintf("%s %d", *DeviceType(), deviceIndex)),
@@ -440,7 +440,7 @@ void cSatipDevice::CloseFilter(int handleP)
 bool cSatipDevice::OpenDvr(void)
 {
   dbg_chan_switch("%s [device %u]", __PRETTY_FUNCTION__, deviceIndex);
-  bytesDeliveredM = 0;
+  bytesDelivered = 0;
   tsBufferM->Clear();
   if (tuner)
      tuner->Open();
@@ -539,9 +539,9 @@ uchar *cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
   dbg_funcname_ext("%s [device %u]", __PRETTY_FUNCTION__, deviceIndex);
   if (isOpenDvrM && tsBufferM) {
      int count = 0;
-     if (bytesDeliveredM) {
-        tsBufferM->Del(bytesDeliveredM);
-        bytesDeliveredM = 0;
+     if (bytesDelivered) {
+        tsBufferM->Del(bytesDelivered);
+        bytesDelivered = 0;
         }
      if (checkTsBuffer && tsBufferM->Available() < TS_SIZE)
         return NULL;
@@ -558,7 +558,7 @@ uchar *cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
            info("Skipped %d bytes to sync on TS packet", count);
            return NULL;
            }
-        bytesDeliveredM = TS_SIZE;
+        bytesDelivered = TS_SIZE;
         if (availableP)
            *availableP = count;
         // Update pid statistics
@@ -572,7 +572,7 @@ uchar *cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
 void cSatipDevice::SkipData(int countP)
 {
   dbg_funcname_ext("%s [device %u]", __PRETTY_FUNCTION__, deviceIndex);
-  bytesDeliveredM = countP;
+  bytesDelivered = countP;
   // Update buffer statistics
   AddBufferStatistic(countP, tsBufferM->Available());
 }

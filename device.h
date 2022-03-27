@@ -31,7 +31,7 @@ private:
     eTuningTimeoutMs = 1000  // in milliseconds
   };
   unsigned int deviceIndex;
-  int bytesDeliveredM;
+  int bytesDelivered;
   bool isOpenDvrM;
   bool checkTsBufferM;
   cString deviceNameM;
