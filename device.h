@@ -43,7 +43,7 @@ private:
 
   // constructor & destructor
 public:
-  explicit cSatipDevice(unsigned int deviceIndexP);
+  explicit cSatipDevice(unsigned int DeviceIndex);
   virtual ~cSatipDevice();
   cString GetInformation(unsigned int pageP = SATIP_DEVICE_INFO_ALL);
 

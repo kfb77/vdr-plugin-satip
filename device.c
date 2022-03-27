@@ -17,8 +17,8 @@ static cSatipDevice * SatipDevicesS[SATIP_MAX_DEVICES] = { NULL };
 
 cMutex cSatipDevice::SetChannelMtx = cMutex();
 
-cSatipDevice::cSatipDevice(unsigned int indexP)
-: deviceIndex(indexP),
+cSatipDevice::cSatipDevice(unsigned int DeviceIndex) :
+  deviceIndex(DeviceIndex),
   bytesDelivered(0),
   isOpenDvrM(false),
   checkTsBufferM(false),
