@@ -8,6 +8,7 @@
 #ifndef __SATIP_DEVICE_H
 #define __SATIP_DEVICE_H
 
+#include <string>
 #include <vdr/device.h>
 #include "common.h"
 #include "deviceif.h"
@@ -30,10 +31,11 @@ private:
     eReadyTimeoutMs  = 2000, // in milliseconds
     eTuningTimeoutMs = 1000  // in milliseconds
   };
-  unsigned int deviceIndex;
+  int deviceIndex;
   int bytesDelivered;
   bool isOpenDvrM;
   bool checkTsBufferM;
+  std::string serverString;
   cChannel currentChannel;
   cRingBufferLinear *tsBuffer;
   cSatipTuner* tuner;
