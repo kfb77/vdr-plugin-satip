@@ -4,7 +4,8 @@
  * See the README file for copyright information and how to reach the author.
  *
  */
-#include <string>
+#include <string>     // std::string
+#include <algorithm>  // std::min()
 #include <vdr/menu.h> // cRecordControl
 
 #include "config.h"
@@ -54,15 +55,13 @@ cSatipDevice::~cSatipDevice()
   DELETE_POINTER(tsBuffer);
 }
 
-bool cSatipDevice::Initialize(unsigned int deviceCountP)
-{
-  dbg_funcname("%s (%u)", __PRETTY_FUNCTION__, deviceCountP);
-  if (deviceCountP > SATIP_MAX_DEVICES)
-     deviceCountP = SATIP_MAX_DEVICES;
-  for (unsigned int i = 0; i < deviceCountP; ++i)
-      SatipDevicesS[i] = new cSatipDevice(i);
-  for (unsigned int i = deviceCountP; i < SATIP_MAX_DEVICES; ++i)
-      SatipDevicesS[i] = NULL;
+bool cSatipDevice::Initialize(int DeviceCount) {
+  dbg_funcname("%s (%d)", __PRETTY_FUNCTION__, DeviceCount);
+  DeviceCount = std::min(DeviceCount, SATIP_MAX_DEVICES);
+  for(int i = 0; i < DeviceCount; i++)
+     SatipDevicesS[i] = new cSatipDevice(i);
+  for(int i = DeviceCount; i < SATIP_MAX_DEVICES; i++)
+     SatipDevicesS[i] = nullptr;
   return true;
 }
 
