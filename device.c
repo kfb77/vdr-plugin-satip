@@ -184,16 +184,23 @@ cString cSatipDevice::DeviceType(void) const {
   return "SAT>IP";
 }
 
-cString cSatipDevice::DeviceName(void) const
-{
+cString cSatipDevice::DeviceName(void) const {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
-  std::string sys;
+  std::string result(*DeviceType());
+
+  result += " " + std::to_string(deviceIndex) + " (";
+
   const char* s = "ACST";
   for(int i=0; s[i]; i++)
      if (ProvidesSource(s[i] << 24))
-        sys += s[i];
+        result += s[i];
 
-  return cString::sprintf("%s %d (%s)", *DeviceType(), deviceIndex, sys.c_str());
+  result += ")";
+
+  if (not serverString.empty())
+     result += " " + serverString;
+
+  return result.c_str();
 }
 
 bool cSatipDevice::AvoidRecording(void) const
@@ -350,18 +357,26 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
      }
 
   if (channel) {
-     cDvbTransponderParameters dtp(channel->Parameters());
      std::string params = GetTransponderUrlParameters(channel);
      if (params.empty()) {
         error("Unrecognized channel parameters: %s [device %d]", channel->Parameters(), deviceIndex);
         return false;
         }
 
-     cSatipServer *server = cSatipDiscover::GetInstance()->AssignServer(deviceIndex, channel->Source(), channel->Transponder(), dtp.System());
+     auto discover = cSatipDiscover::GetInstance();
+     auto server = discover->AssignServer(deviceIndex,
+                                          channel->Source(),
+                                          channel->Transponder(),
+                                          cDvbTransponderParameters(channel->Parameters()).System());
+
      if (!server) {
-        dbg_chan_switch("%s No suitable server found [device %d]", __PRETTY_FUNCTION__, deviceIndex);
+        dbg_chan_switch("%s No server for %s [device %d]",
+            __PRETTY_FUNCTION__, *channel->ToText(), deviceIndex);
         return false;
         }
+
+     serverString = *discover->GetServerString(server);
+
      if (tuner->SetSource(server, channel->Transponder(), params.c_str(), deviceIndex)) {
         currentChannel = *channel;
         // Wait for actual channel tuning to prevent simultaneous frontend allocation failures
@@ -370,7 +385,8 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
         }
      }
   else {
-     tuner->SetSource(NULL, 0, NULL, deviceIndex);
+     tuner->SetSource(nullptr, 0, nullptr, deviceIndex);
+     serverString.clear();
      }
   return true;
 }
