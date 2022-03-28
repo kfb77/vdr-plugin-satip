@@ -20,9 +20,6 @@
 #warning "CURL version >= 7.36.0 is recommended"
 #endif
 
-#if defined(APIVERSNUM) && APIVERSNUM < 20400
-#error "VDR-2.4.0 API version or greater is required!"
-#endif
 
 #ifndef GITVERSION
 #define GITVERSION ""
