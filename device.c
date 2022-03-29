@@ -22,7 +22,7 @@ cMutex cSatipDevice::SetChannelMtx = cMutex();
 cSatipDevice::cSatipDevice(unsigned int DeviceIndex) :
   deviceIndex(DeviceIndex),
   bytesDelivered(0),
-  isOpenDvrM(false),
+  dvrIsOpen(false),
   checkTsBufferM(false),
   currentChannel(),
   SectionFilterHandler(nullptr),
@@ -433,15 +433,15 @@ void cSatipDevice::CloseFilter(int handleP)
      }
 }
 
-bool cSatipDevice::OpenDvr(void)
-{
+bool cSatipDevice::OpenDvr(void) {
   dbg_chan_switch("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   bytesDelivered = 0;
-  tsBuffer->Clear();
-  if (tuner)
+  if (tuner && tsBuffer) {
+     tsBuffer->Clear();
      tuner->Open();
-  isOpenDvrM = true;
-  return true;
+     dvrIsOpen = true;
+     }
+  return dvrIsOpen;
 }
 
 void cSatipDevice::CloseDvr(void)
@@ -449,7 +449,7 @@ void cSatipDevice::CloseDvr(void)
   dbg_chan_switch("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   if (tuner)
      tuner->Close();
-  isOpenDvrM = false;
+  dvrIsOpen = false;
 }
 
 bool cSatipDevice::HasLock(int timeoutMsP) const
@@ -476,7 +476,7 @@ void cSatipDevice::WriteData(unsigned char* bufferP, int lengthP)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   // Fill up TS buffer
-  if (isOpenDvrM && tsBuffer) {
+  if (dvrIsOpen && tsBuffer) {
      int len = tsBuffer->Put(bufferP, lengthP);
      if (len != lengthP)
         tsBuffer->ReportOverflow(lengthP - len);
@@ -533,7 +533,7 @@ bool cSatipDevice::IsIdle(void)
 unsigned char* cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
-  if (isOpenDvrM && tsBuffer) {
+  if (dvrIsOpen && tsBuffer) {
      int count = 0;
      if (bytesDelivered) {
         tsBuffer->Del(bytesDelivered);

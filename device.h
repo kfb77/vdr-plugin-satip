@@ -33,7 +33,7 @@ private:
   };
   int deviceIndex;
   int bytesDelivered;
-  bool isOpenDvrM;
+  bool dvrIsOpen;
   bool checkTsBufferM;
   std::string serverString;
   cChannel currentChannel;
