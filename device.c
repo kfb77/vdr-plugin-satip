@@ -444,10 +444,9 @@ bool cSatipDevice::OpenDvr(void) {
   return dvrIsOpen;
 }
 
-void cSatipDevice::CloseDvr(void)
-{
+void cSatipDevice::CloseDvr(void) {
   dbg_chan_switch("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
-  if (tuner)
+  if (dvrIsOpen)
      tuner->Close();
   dvrIsOpen = false;
 }
@@ -476,7 +475,7 @@ void cSatipDevice::WriteData(unsigned char* bufferP, int lengthP)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   // Fill up TS buffer
-  if (dvrIsOpen && tsBuffer) {
+  if (dvrIsOpen) {
      int len = tsBuffer->Put(bufferP, lengthP);
      if (len != lengthP)
         tsBuffer->ReportOverflow(lengthP - len);
@@ -533,7 +532,7 @@ bool cSatipDevice::IsIdle(void)
 unsigned char* cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
-  if (dvrIsOpen && tsBuffer) {
+  if (dvrIsOpen) {
      int count = 0;
      if (bytesDelivered) {
         tsBuffer->Del(bytesDelivered);
