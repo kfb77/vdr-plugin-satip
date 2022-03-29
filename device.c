@@ -451,18 +451,19 @@ void cSatipDevice::CloseDvr(void) {
   dvrIsOpen = false;
 }
 
-bool cSatipDevice::HasLock(int timeoutMsP) const
-{
-  dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, timeoutMsP, deviceIndex);
-  if (timeoutMsP > 0) {
-     cTimeMs timer(timeoutMsP);
-     while (!timer.TimedOut()) {
-           if (tuner && tuner->HasLock())
-              return true;
-           cCondWait::SleepMs(100);
-           }
+bool cSatipDevice::HasLock(int timeout) const {
+  dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, timeout, deviceIndex);
+  static constexpr int interval = 100;
+
+  while(timeout > 0) {
+     if (not tuner)
+        return false;
+     if (tuner->HasLock())
+        return true;
+     cCondWait::SleepMs(interval);
+     timeout -= interval;
      }
-  return (tuner && tuner->HasLock());
+  return tuner && tuner->HasLock();
 }
 
 bool cSatipDevice::HasInternalCam(void)

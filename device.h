@@ -102,7 +102,7 @@ public:
 
   // for transponder lock
 public:
-  virtual bool HasLock(int timeoutMsP = 0) const;
+  virtual bool HasLock(int timeout = 0) const;
 
   // for common interface
 public:
