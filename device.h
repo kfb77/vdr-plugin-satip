@@ -86,18 +86,18 @@ protected:
 
   // for recording
 private:
-  uchar *GetData(int *availableP = NULL, bool checkTsBuffer = false);
+  unsigned char* GetData(int *availableP = NULL, bool checkTsBuffer = false);
   void SkipData(int countP);
 
 protected:
   virtual bool SetPid(cPidHandle *handleP, int typeP, bool onP);
   virtual bool OpenDvr(void);
   virtual void CloseDvr(void);
-  virtual bool GetTSPacket(uchar *&dataP);
+  virtual bool GetTSPacket(unsigned char*& dataP);
 
   // for section filtering
 public:
-  virtual int OpenFilter(u_short pidP, u_char tidP, u_char maskP);
+  virtual int OpenFilter(unsigned short pidP, unsigned char tidP, unsigned char maskP);
   virtual void CloseFilter(int handleP);
 
   // for transponder lock
@@ -110,7 +110,7 @@ public:
 
   // for internal device interface
 public:
-  virtual void WriteData(u_char *bufferP, int lengthP);
+  virtual void WriteData(unsigned char* bufferP, int lengthP);
   virtual void SetChannelTuned(void);
   virtual int GetId(void);
   virtual int GetPmtPid(void);

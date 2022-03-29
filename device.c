@@ -410,7 +410,7 @@ bool cSatipDevice::SetPid(cPidHandle *handleP, int typeP, bool onP)
   return true;
 }
 
-int cSatipDevice::OpenFilter(u_short pidP, u_char tidP, u_char maskP)
+int cSatipDevice::OpenFilter(unsigned short pidP, unsigned char tidP, unsigned char maskP)
 {
   dbg_pids("%s (%d, %02X, %02X) [device %d]", __PRETTY_FUNCTION__, pidP, tidP, maskP, deviceIndex);
   if (SectionFilterHandler) {
@@ -472,7 +472,7 @@ bool cSatipDevice::HasInternalCam(void)
   return SatipConfig.GetCIExtension();
 }
 
-void cSatipDevice::WriteData(uchar *bufferP, int lengthP)
+void cSatipDevice::WriteData(unsigned char* bufferP, int lengthP)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   // Fill up TS buffer
@@ -530,7 +530,7 @@ bool cSatipDevice::IsIdle(void)
   return !Receiving();
 }
 
-uchar *cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
+unsigned char* cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   if (isOpenDvrM && tsBuffer) {
@@ -541,7 +541,7 @@ uchar *cSatipDevice::GetData(int *availableP, bool checkTsBuffer)
         }
      if (checkTsBuffer && tsBuffer->Available() < TS_SIZE)
         return NULL;
-     uchar *p = tsBuffer->Get(count);
+     auto p = tsBuffer->Get(count);
      if (p && count >= TS_SIZE) {
         if (*p != TS_SYNC_BYTE) {
            for (int i = 1; i < count; i++) {
@@ -573,7 +573,7 @@ void cSatipDevice::SkipData(int countP)
   AddBufferStatistic(countP, tsBuffer->Available());
 }
 
-bool cSatipDevice::GetTSPacket(uchar *&dataP)
+bool cSatipDevice::GetTSPacket(unsigned char*& dataP)
 {
   dbg_funcname_ext("%s [device %d]", __PRETTY_FUNCTION__, deviceIndex);
   if (SatipConfig.GetDetachedMode())
