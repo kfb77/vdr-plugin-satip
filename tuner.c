@@ -14,11 +14,12 @@
 #include "log.h"
 #include "poller.h"
 #include "tuner.h"
+#include "device.h"
 
-cSatipTuner::cSatipTuner(cSatipDeviceIf &deviceP, unsigned int packetLenP)
+cSatipTuner::cSatipTuner(cSatipDevice& deviceP, unsigned int packetLenP)
 : cThread(cString::sprintf("SATIP#%d tuner", deviceP.GetId())),
   sleepM(),
-  deviceM(&deviceP),
+  deviceM(deviceP),
   deviceIdM(deviceP.GetId()),
   rtspM(*this),
   rtpM(*this),
@@ -132,7 +133,7 @@ void cSatipTuner::Action(void)
                break;
           case tsTuned:
                dbg_tunerstate("%s: tsTuned [device %d]", __PRETTY_FUNCTION__, deviceIdM);
-               deviceM->SetChannelTuned();
+               deviceM.SetChannelTuned();
                reConnectM.Set(eConnectTimeoutMs);
                idleCheck.Set(eIdleCheckTimeoutMs);
                lastIdleStatus = false;
@@ -171,7 +172,7 @@ void cSatipTuner::Action(void)
                   break;
                   }
                if (idleCheck.TimedOut()) {
-                  bool currentIdleStatus = deviceM->IsIdle();
+                  bool currentIdleStatus = deviceM.IsIdle();
                   if (lastIdleStatus && currentIdleStatus) {
                      info("Idle timeout - releasing [device %d]", deviceIdM);
                      RequestState(tsRelease, smInternal);
@@ -306,7 +307,7 @@ void cSatipTuner::ProcessVideoData(u_char *bufferP, int lengthP)
         dbg_rtp_perf("%s AddTunerStatistic() took %" PRIu64 " ms [device %d]", __PRETTY_FUNCTION__, elapsed, deviceIdM);
 
      processing.Set(0);
-     deviceM->WriteData(bufferP, lengthP);
+     deviceM.WriteData(bufferP, lengthP);
      elapsed = processing.Elapsed();
      if (elapsed > 1)
         dbg_rtp_perf("%s WriteData() took %" PRIu64 " ms [device %d]", __FUNCTION__, elapsed, deviceIdM);
@@ -531,9 +532,9 @@ bool cSatipTuner::UpdatePids(bool forceP)
            //           value 0 releases the CI slot
            //           CI slot released automatically if the stream is released,
            //           but not when used retuning to another channel
-           int pid = deviceM->GetPmtPid();
+           int pid = deviceM.GetPmtPid();
            if ((pid > 0) && (pid != pmtPidM)) {
-              int slot = deviceM->GetCISlot();
+              int slot = deviceM.GetCISlot();
               uri = cString::sprintf("%s%sx_pmt=%d", *uri, paramadded ? "&" : "?", pid);
               if (slot > 0)
                  uri = cString::sprintf("%s&x_ci=%d", *uri, slot);
@@ -544,7 +545,7 @@ bool cSatipTuner::UpdatePids(bool forceP)
         else if (currentServerM.IsQuirk(cSatipServer::eSatipQuirkCiTnr)) {
            // CI extension parameters:
            // - tnr : specifies a channel config entry
-           cString param = deviceM->GetTnrParameterString();
+           cString param = deviceM.GetTnrParameterString();
            if (!isempty(*param) && strcmp(*tnrParamM, *param) != 0) {
               uri = cString::sprintf("%s%stnr=%s", *uri, paramadded ? "&" : "?", *param);
               paramadded = true;

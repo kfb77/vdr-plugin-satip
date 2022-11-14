@@ -11,13 +11,17 @@
 #include <vdr/thread.h>
 #include <vdr/tools.h>
 
-#include "deviceif.h"
 #include "discover.h"
 #include "rtp.h"
 #include "rtcp.h"
 #include "rtsp.h"
 #include "server.h"
 #include "statistics.h"
+
+/* forward declarations */
+class cSatipDevice;
+
+
 
 class cSatipPid : public cVector<int> {
 private:
@@ -96,7 +100,7 @@ private:
   enum eStateMode { smInternal, smExternal };
 
   cCondWait sleepM;
-  cSatipDeviceIf* deviceM;
+  cSatipDevice& deviceM;
   int deviceIdM;
   cSatipRtsp rtspM;
   cSatipRtp rtpM;
@@ -148,7 +152,7 @@ protected:
   virtual void Action(void);
 
 public:
-  cSatipTuner(cSatipDeviceIf &deviceP, unsigned int packetLenP);
+  cSatipTuner(cSatipDevice& deviceP, unsigned int packetLenP);
   virtual ~cSatipTuner();
   bool IsTuned(void) const { return (currentStateM >= tsTuned); }
   bool SetSource(cSatipServer *serverP, const int transponderP, const char *parameterP, const int indexP);
