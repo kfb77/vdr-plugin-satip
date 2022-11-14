@@ -16,6 +16,8 @@
 #include "tuner.h"
 #include "param.h"
 #include "device.h"
+#include <vdr/channels.h>
+#include <repfunc.h>
 
 cSatipTuner::cSatipTuner(cSatipDevice& deviceP, unsigned int packetLenP)
 : cThread(cString::sprintf("SATIP#%d tuner", deviceP.GetId())),
@@ -325,7 +327,7 @@ void cSatipTuner::ProcessApplicationData(u_char *bufferP, int lengthP)
 {
   dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
   // DVB-S2:
-  // ver=<major>.<minor>;src=<srcID>;tuner=<feID>,<level>,<lock>,<quality>,<frequency>,<polarisation>,<system>,<type>,<pilots>,<roll_off>,<symbol_rate>,<fec_inner>;pids=<pid0>,...,<pidn>
+  // ver=1.0;src=<srcID>;tuner=<feID>,<level>,<lock>,<quality>,<frequency>,<polarisation>,<system>,<type>,<pilots>,<roll_off>,<symbol_rate>,<fec_inner>;pids=<pid0>,...,<pidn>
   // DVB-T2:
   // ver=1.1;tuner=<feID>,<level>,<lock>,<quality>,<freq>,<bw>,<msys>,<tmode>,<mtype>,<gi>,<fec>,<plp>,<t2id>,<sm>;pids=<pid0>,...,<pidn>
   // DVB-C2:
