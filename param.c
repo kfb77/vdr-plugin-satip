@@ -120,6 +120,44 @@ static const tSatipParameterMap SatipInversionValues[] = {
   { INVERSION_ON  , "&specinv=1" },
   { -1, nullptr }};
 
+int SatipToDvbParameter(std::string param) {
+  const tSatipParameterMap* map = nullptr;
+
+  if (param.find("&bw=") == 0)
+     map = SatipBandwidthValues;
+  else if (param.find("&plts=") == 0)
+     map = SatipPilotValues;
+  else if (param.find("&sm=") == 0)
+     map = SatipSisoMisoValues;
+  else if (param.find("&fec=") == 0)
+     map = SatipCodeRateValues;
+  else if (param.find("&mtype=") == 0)
+     map = SatipModulationValues;
+  else if (param.find("&msys=dvbs") == 0)
+     map = SatipSystemValuesSat;
+  else if (param.find("&msys=dvbt") == 0)
+     map = SatipSystemValuesTerrestrial;
+  else if (param.find("&msys=dvbc") == 0)
+     map = SatipSystemValuesCable;
+  else if (param.find("&msys=atsc") == 0)
+     map = SatipSystemValuesAtsc;
+  else if (param.find("&tmode=") == 0)
+     map = SatipTransmissionValues;
+  else if (param.find("&gi=") == 0)
+     map = SatipGuardValues;
+  else if (param.find("&ro=") == 0)
+     map = SatipRollOffValues;
+  else if (param.find("&specinv=") == 0)
+     map = SatipInversionValues;
+
+  auto it = map;
+  while(it && it->satipString) {
+     if (it->satipString == param)
+        return it->driverValue;
+     it++;
+     }
+  return 999;
+}
 
 std::string GetTransponderUrlParameters(const cChannel* channel) {
   std::string result;

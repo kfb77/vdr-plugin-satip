@@ -14,6 +14,7 @@
 #include "log.h"
 #include "poller.h"
 #include "tuner.h"
+#include "param.h"
 #include "device.h"
 
 cSatipTuner::cSatipTuner(cSatipDevice& deviceP, unsigned int packetLenP)
