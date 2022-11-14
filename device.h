@@ -17,6 +17,7 @@
 #include "statistics.h"
 
 class cSatipDevice : public cDevice, public cSatipPidStatistics, public cSatipBufferStatistics, public cSatipDeviceIf {
+friend class cSatipTuner;
   // static ones
 public:
   static bool Initialize(int DeviceCount);
