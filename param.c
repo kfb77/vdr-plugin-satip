@@ -16,111 +16,112 @@
 struct tSatipParameterMap {
   int driverValue;
   const char* satipString;
+  int vdrValue;
 };
 
 static const tSatipParameterMap SatipBandwidthValues[] = {
-  { 5000000 , "&bw=5"     },
-  { 6000000 , "&bw=6"     },
-  { 7000000 , "&bw=7"     },
-  { 8000000 , "&bw=8"     },
-  { 10000000, "&bw=10"    },
-  { 1712000 , "&bw=1.712" },
-  { -1, nullptr }};
+  { 5000000 , "&bw=5"    , 5    },
+  { 6000000 , "&bw=6"    , 6    },
+  { 7000000 , "&bw=7"    , 7    },
+  { 8000000 , "&bw=8"    , 8    },
+  { 10000000, "&bw=10"   , 10   },
+  { 1712000 , "&bw=1.712", 1712 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipPilotValues[] = {
-  { PILOT_OFF , "&plts=off" },
-  { PILOT_ON  , "&plts=on"  },
-  { PILOT_AUTO, ""          },
-  { -1, nullptr }};
+  { PILOT_OFF , "&plts=off", 0   },
+  { PILOT_ON  , "&plts=on" , 1   },
+  { PILOT_AUTO, ""         , 999 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipSisoMisoValues[] = {
-  { 0 , "&sm=0" },
-  { 1 , "&sm=1" },
-  { -1, nullptr }};
+  { 0 , "&sm=0", 0 },
+  { 1 , "&sm=1", 1 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipCodeRateValues[] = {
-  { FEC_NONE, ""         },
-  { FEC_1_2 , "&fec=12"  },
-  { FEC_2_3 , "&fec=23"  },
-  { FEC_3_4 , "&fec=34"  },
-  { FEC_3_5 , "&fec=35"  },
-  { FEC_4_5 , "&fec=45"  },
-  { FEC_5_6 , "&fec=56"  },
-  { FEC_6_7 , "&fec=67"  },
-  { FEC_7_8 , "&fec=78"  },
-  { FEC_8_9 , "&fec=89"  },
-  { FEC_9_10, "&fec=910" },
-  { FEC_AUTO, ""         },
-  { -1, nullptr }};
+  { FEC_NONE, ""        , 0   },
+  { FEC_1_2 , "&fec=12" , 12  },
+  { FEC_2_3 , "&fec=23" , 23  },
+  { FEC_3_4 , "&fec=34" , 34  },
+  { FEC_3_5 , "&fec=35" , 35  },
+  { FEC_4_5 , "&fec=45" , 45  },
+  { FEC_5_6 , "&fec=56" , 56  },
+  { FEC_6_7 , "&fec=67" , 67  },
+  { FEC_7_8 , "&fec=78" , 78  },
+  { FEC_8_9 , "&fec=89" , 89  },
+  { FEC_9_10, "&fec=910", 910 },
+  { FEC_AUTO, ""        , 999 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipModulationValues[] = {
-  { QPSK    , "&mtype=qpsk"   },
-  { PSK_8   , "&mtype=8psk"   },
-  { APSK_16 , "&mtype=16apsk" },
-  { APSK_32 , "&mtype=32apsk" },
-  { VSB_8   , "&mtype=8vsb"   },
-  { VSB_16  , "&mtype=16vsb"  },
-  { QAM_16  , "&mtype=16qam"  },
-  { QAM_64  , "&mtype=64qam"  },
-  { QAM_128 , "&mtype=128qam" },
-  { QAM_256 , "&mtype=256qam" },
-  { QAM_AUTO, ""              },
-  { -1, nullptr }};
+  { QPSK    , "&mtype=qpsk"  , 2   },
+  { PSK_8   , "&mtype=8psk"  , 5   },
+  { APSK_16 , "&mtype=16apsk", 6   },
+  { APSK_32 , "&mtype=32apsk", 7   },
+  { VSB_8   , "&mtype=8vsb"  , 10  },
+  { VSB_16  , "&mtype=16vsb" , 11  },
+  { QAM_16  , "&mtype=16qam" , 16  },
+  { QAM_64  , "&mtype=64qam" , 64  },
+  { QAM_128 , "&mtype=128qam", 128 },
+  { QAM_256 , "&mtype=256qam", 256 },
+  { QAM_AUTO, ""             , 999 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipSystemValuesSat[] = {
-  { 0, "&msys=dvbs"  },
-  { 1, "&msys=dvbs2" },
-  { -1, nullptr }};
+  { 0, "&msys=dvbs" , 0 },
+  { 1, "&msys=dvbs2", 1 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipSystemValuesTerrestrial[] = {
-  { 0, "&msys=dvbt"  },
-  { 1, "&msys=dvbt2" },
-  { -1, nullptr }};
+  { 0, "&msys=dvbt" , 0 },
+  { 1, "&msys=dvbt2", 1 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipSystemValuesCable[] = {
-  { 0, "&msys=dvbc"  },
-  { 1, "&msys=dvbc2" },
-  { -1, nullptr }};
+  { 0, "&msys=dvbc" , 0 },
+  { 1, "&msys=dvbc2", 1 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipSystemValuesAtsc[] = {
-  { 0, "&msys=atsc" },
-  { -1, nullptr }};
+  { 0, "&msys=atsc", 0 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipTransmissionValues[] = {
-  { TRANSMISSION_MODE_1K  , "&tmode=1k"  },
-  { TRANSMISSION_MODE_2K  , "&tmode=2k"  },
-  { TRANSMISSION_MODE_4K  , "&tmode=4k"  },
-  { TRANSMISSION_MODE_8K  , "&tmode=8k"  },
-  { TRANSMISSION_MODE_16K , "&tmode=16k" },
-  { TRANSMISSION_MODE_32K , "&tmode=32k" },
-  { TRANSMISSION_MODE_AUTO, ""           },
-  { -1, nullptr }};
+  { TRANSMISSION_MODE_1K  , "&tmode=1k" , 1   },
+  { TRANSMISSION_MODE_2K  , "&tmode=2k" , 2   },
+  { TRANSMISSION_MODE_4K  , "&tmode=4k" , 4   },
+  { TRANSMISSION_MODE_8K  , "&tmode=8k" , 8   },
+  { TRANSMISSION_MODE_16K , "&tmode=16k", 16  },
+  { TRANSMISSION_MODE_32K , "&tmode=32k", 32  },
+  { TRANSMISSION_MODE_AUTO, ""          , 999 },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipGuardValues[] = {
-  { GUARD_INTERVAL_1_4   , "&gi=14"    },
-  { GUARD_INTERVAL_1_8   , "&gi=18"    },
-  { GUARD_INTERVAL_1_16  , "&gi=116"   },
-  { GUARD_INTERVAL_1_32  , "&gi=132"   },
-  { GUARD_INTERVAL_1_128 , "&gi=1128"  },
-  { GUARD_INTERVAL_19_128, "&gi=19128" },
-  { GUARD_INTERVAL_19_256, "&gi=19256" },
-  { GUARD_INTERVAL_AUTO  , ""          },
-  { -1, nullptr }};
+  { GUARD_INTERVAL_1_4   , "&gi=14"   , 4     },
+  { GUARD_INTERVAL_1_8   , "&gi=18"   , 8     },
+  { GUARD_INTERVAL_1_16  , "&gi=116"  , 16    },
+  { GUARD_INTERVAL_1_32  , "&gi=132"  , 32    },
+  { GUARD_INTERVAL_1_128 , "&gi=1128" , 128   },
+  { GUARD_INTERVAL_19_128, "&gi=19128", 19128 },
+  { GUARD_INTERVAL_19_256, "&gi=19256", 19256 },
+  { GUARD_INTERVAL_AUTO  , ""         , 999   },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipRollOffValues[] = {
-  { ROLLOFF_AUTO, ""         },
-  { ROLLOFF_20  , "&ro=0.20" },
-  { ROLLOFF_25  , "&ro=0.25" },
-  { ROLLOFF_35  , "&ro=0.35" },
-  { -1, nullptr }};
+  { ROLLOFF_AUTO, ""        , 0   },
+  { ROLLOFF_20  , "&ro=0.20", 20  },
+  { ROLLOFF_25  , "&ro=0.25", 25  },
+  { ROLLOFF_35  , "&ro=0.35", 35  },
+  { -1, nullptr, -1 }};
 
 static const tSatipParameterMap SatipInversionValues[] = {
-  { INVERSION_AUTO, ""           },
-  { INVERSION_OFF , "&specinv=0" },
-  { INVERSION_ON  , "&specinv=1" },
-  { -1, nullptr }};
+  { INVERSION_AUTO, ""          , 999 },
+  { INVERSION_OFF , "&specinv=0", 0   },
+  { INVERSION_ON  , "&specinv=1", 1   },
+  { -1, nullptr, -1 }};
 
-int SatipToDvbParameter(std::string param) {
+int SatipToVdrParameter(std::string param) {
   const tSatipParameterMap* map = nullptr;
 
   if (param.find("&bw=") == 0)
@@ -153,7 +154,7 @@ int SatipToDvbParameter(std::string param) {
   auto it = map;
   while(it && it->satipString) {
      if (it->satipString == param)
-        return it->driverValue;
+        return it->vdrValue;
      it++;
      }
   return 999;
@@ -571,4 +572,19 @@ std::string GetTnrUrlParameters(const cChannel* channel) {
      return ss.str();
      }
   return "";
+}
+
+int SrcIdToSource(int pos) {
+  for(cSource* s = Sources.First(); s; s = Sources.Next(s)) {
+     if ((s->Code() >> 24) != 'S')
+        continue;
+
+     const char* d = s->Description();
+
+     if (!d or *d < '1' and *d > '4')
+        continue;
+
+     return s->Code();
+     }
+  return -1;
 }

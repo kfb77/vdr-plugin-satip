@@ -11,4 +11,5 @@
 
 std::string GetTransponderUrlParameters(const cChannel* channel);
 std::string GetTnrUrlParameters(const cChannel* channel);
-int SatipToDvbParameter(std::string param);
+int SatipToVdrParameter(std::string param);
+int SrcIdToSource(int pos);
