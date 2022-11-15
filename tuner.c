@@ -5,8 +5,9 @@
  *
  */
 
-#define __STDC_FORMAT_MACROS // Required for format specifiers
-#include <inttypes.h>
+#include <cinttypes>
+#include <iostream>
+#include <sstream>
 
 #include "common.h"
 #include "config.h"
@@ -326,55 +327,162 @@ void cSatipTuner::ProcessRtpData(u_char *bufferP, int lengthP)
 void cSatipTuner::ProcessApplicationData(u_char *bufferP, int lengthP)
 {
   dbg_funcname_ext("%s (%d) [device %d]", __PRETTY_FUNCTION__, lengthP, deviceIdM);
-  // DVB-S2:
-  // ver=1.0;src=<srcID>;tuner=<feID>,<level>,<lock>,<quality>,<frequency>,<polarisation>,<system>,<type>,<pilots>,<roll_off>,<symbol_rate>,<fec_inner>;pids=<pid0>,...,<pidn>
-  // DVB-T2:
-  // ver=1.1;tuner=<feID>,<level>,<lock>,<quality>,<freq>,<bw>,<msys>,<tmode>,<mtype>,<gi>,<fec>,<plp>,<t2id>,<sm>;pids=<pid0>,...,<pidn>
-  // DVB-C2:
-  // ver=1.2;tuner=<feID>,<level>,<lock>,<quality>,<freq>,<bw>,<msys>,<mtype>,<sr>,<c2tft>,<ds>,<plp>,<specinv>;pids=<pid0>,...,<pidn>
-  if (lengthP > 0) {
-     char s[lengthP];
-     memcpy(s, (char *)bufferP, lengthP);
-     dbg_rtcp("%s (%s) [device %d]", __PRETTY_FUNCTION__, s, deviceIdM);
-     char *c = strstr(s, ";tuner=");
-     if (c)  {
-        int value;
-
-        // feID:
-        frontendIdM = atoi(c + 7);
-
-        // level:
-        // Numerical value between 0 and 255
-        // An incoming L-band satellite signal of
-        // -25dBm corresponds to 224
-        // -65dBm corresponds to 32
-        // No signal corresponds to 0
-        c = strstr(c, ",");
-        value = min(atoi(++c), 255);
-        signalStrengthDBmM = (value > 0) ? 40.0 * (value - 32) / 192.0 - 65.0 : 0.0;
-        // Scale value to 0-100
-        signalStrengthM = (value >= 0) ? 0.5 + value * 100.0 / 255.0 : -1;
-
-        // lock:
-        // lock Set to one of the following values:
-        // "0" the frontend is not locked
-        // "1" the frontend is locked
-        c = strstr(c, ",");
-        hasLockM = !!atoi(++c);
-
-        // quality:
-        // Numerical value between 0 and 15
-        // Lowest value corresponds to highest error rate
-        // The value 15 shall correspond to
-        // -a BER lower than 2x10-4 after Viterbi for DVB-S
-        // -a PER lower than 10-7 for DVB-S2
-        c = strstr(c, ",");
-        value = min(atoi(++c), 15);
-        // Scale value to 0-100
-        signalQualityM = (hasLockM && (value >= 0)) ? 0.5 + (value * 100.0 / 15.0) : 0;
-        }
-     }
   reConnectM.Set(eConnectTimeoutMs);
+
+  if (lengthP < 33) /* bare minimum. */
+     return;
+
+  char s[lengthP+1];
+  memcpy(s, (char *)bufferP, lengthP);
+  s[lengthP] = 0;
+
+  char* ps = strstr(s, "ver=");
+  auto payload = SplitStr(ps, ';');
+
+  if (payload.size() < 3)
+     return;
+
+  // DVB-S2: ver=1.0;src=<srcID>;(..)
+  // DVB-T2: ver=1.1;(..)
+  // DVB-C2: ver=1.2;(..)
+
+  bool isSat   = payload[0] == "ver=1.0";
+  bool isTerr  = payload[0] == "ver=1.1";
+  bool isCable = payload[0] == "ver=1.2";
+  size_t next = 1;
+  int srcID = -1;
+
+  if (isSat)
+     srcID = StrToInt(payload[next++].substr(4));
+
+  // tuner=<feID>,<level>,<lock>,<quality>,(..)
+  auto params = SplitStr(payload[next++].substr(6), ',');
+  while(params.size() < 14)
+     params.push_back("");
+
+  dbg_rtcp("%s (%s) [device %d]", __PRETTY_FUNCTION__, ps, deviceIdM);
+
+  // feID:
+  frontendIdM = StrToInt(params[0]);
+
+  // level: 0..255
+  // 224 corresponds to -25dBm
+  //  32 corresponds to -65dBm
+  //   0 corresponds to 'no signal' (dBm not available)
+  int level = StrToInt(params[1]);
+  signalStrengthDBmM = (level > 0) ? 40.0 * (level - 32) / 192.0 - 65.0 : 0.0;
+  // Scale value to 0-100
+  signalStrengthM = (level >= 0) ? 0.5 + level * 100.0 / 255.0 : -1;
+
+  // lock: "0" = not locked, "1" = locked
+  hasLockM = params[2] == "1";
+
+  // quality: 0..15, lowest value corresponds to highest error rate
+  // The value 15 shall correspond to
+  // -a BER lower than 2x10-4 after Viterbi for DVB-S
+  // -a PER lower than 10-7 for DVB-S2
+  int quality = StrToInt(params[3]);
+  // Scale value to 0-100
+  signalQualityM = (hasLockM && (quality >= 0)) ? 0.5 + (quality * 100.0 / 15.0) : 0;
+
+  if (TP.size() == params.size()-4) {
+     bool equal = std::equal(params.begin()+4, params.end(), TP.begin());
+     if (equal)
+        return;
+     }
+  TP = {params.begin()+4, params.end()};
+
+  cChannel& channel = deviceM.currentChannel;
+  std::stringstream ss;
+
+  const bool DebugRtcp = false;
+
+  if (isSat) {
+     // <frequency>,<polarisation>,<system>,<type>,<pilots>,<roll_off>,<symbol_rate>,<fec_inner>
+     int  Frequency    = lround(StrToFloat(params[4]));                  // <frequency>,
+     char Polarisation = (UpperCase(params[5]))[0];                      // <polarisation>,
+     int  System       = SatipToVdrParameter("&msys=" + params[6]);      // <system>,
+     int  Type         = SatipToVdrParameter("&mtype=" + params[7]);     // <type>,
+     int  Pilots       = SatipToVdrParameter("&plts=" + params[8]);      // <pilots>,
+     int  RollOff      = SatipToVdrParameter("&ro=" + params[9]);        // <roll_off>,
+     int  SymbolRate   = params[10].empty()? 0 : StrToInt(params[10]);   // <symbol_rate>,
+     int  Fec          = SatipToVdrParameter("&fec=" + params[11]);      // <fec_inner>
+     int  Source       = SrcIdToSource(srcID);
+
+     if (Source < 0)
+        Source = channel.Source();
+     if (SymbolRate <= 0)
+        SymbolRate = channel.Srate();
+     ss << Polarisation;
+     ss << 'C' << Fec;
+     ss << 'M' << Type;
+     if (System > 0) {
+        ss << 'N' << Pilots;
+        ss << 'O' << RollOff;
+      //ss << 'P' << 999;
+        }
+     ss << 'S' << System;
+     if (DebugRtcp) {
+        std::cout << *(cSource::ToString(Source)) << ":"
+                  << Frequency << ":" << ss.str() << ":" << SymbolRate << std::endl;
+        }
+     channel.SetTransponderData(Source, Frequency, SymbolRate, ss.str().c_str(), true);
+     }
+  else if (isTerr) {
+     // <freq>,<bw>,<msys>,<tmode>,<mtype>,<gi>,<fec>,<plp>,<t2id>,<sm>
+     int  Frequency    = lround(StrToFloat(params[4]));                  // <freq>,
+     int  BandWidth    = SatipToVdrParameter("&bw=" + params[5]);        // <bw>,
+     int  System       = SatipToVdrParameter("&msys=" + params[6]);      // <msys>,
+     int  Transmission = SatipToVdrParameter("&tmode=" + params[7]);     // <tmode>,
+     int  Type         = SatipToVdrParameter("&mtype=" + params[8]);     // <mtype>,
+     int  Guard        = SatipToVdrParameter("&gi=" + params[9]);        // <gi>,
+     int  Fec          = SatipToVdrParameter("&fec=" + params[10]);      // <fec>,
+     int  Plp          = params[11].empty()? -1 : StrToInt(params[11]);  // <plp> (opt),
+     int  T2id         = params[12].empty()? -1 : StrToInt(params[12]);  // <t2id> (opt),
+     int  SM           = SatipToVdrParameter("&sm=" + params[next++]);   // <sm> (opt)
+
+     ss << 'B' << BandWidth;
+     ss << 'C' << Fec;
+     ss << 'G' << Guard;
+     ss << 'M' << Type;
+     if (System > 0) {
+        ss << 'P' << Plp;
+        ss << 'Q' << T2id;
+        }
+     ss << 'S' << System;
+     ss << 'T' << Transmission;
+     if (System > 0) {
+        ss << 'X' << SM;
+        }
+
+     if (DebugRtcp) {
+        std::cout << Frequency << ":" << ss.str() << std::endl;
+        }
+     channel.SetTransponderData('T' << 24, Frequency, 0, ss.str().c_str(), true);
+     }
+  else if (isCable) {
+     // <freq>,<bw>,<msys>,<mtype>,<sr>,<c2tft>,<ds>,<plp>,<specinv>
+     int  Frequency    = lround(StrToFloat(params[4]));                  // <freq>,
+   //int  BandWidth    = SatipToVdrParameter("&bw=" + params[5]);        // <bw> (opt),
+   //int  System       = SatipToVdrParameter("&msys=" + params[6]);      // <msys>,
+     int  Type         = SatipToVdrParameter("&mtype=" + params[7]);     // <mtype> (opt),
+     int  SymbolRate   = params[8].empty()? 0 : StrToInt(params[8]);     // <sr> (opt),
+   //int  C2tft        = params[9].empty()? 0 : StrToInt(params[9]);     // <c2tft> (opt),
+   //int  DS           = params[10].empty()? 0 : StrToInt(params[10]);   // <ds> (opt),
+   //int  Plp          = params[11].empty()? -1 : StrToInt(params[11]);  // <plp> (opt),
+     int  Inversion    = params[12].empty()? 999 : StrToInt(params[12]); // <specinv> (opt),
+
+     if (SymbolRate <= 0)
+        SymbolRate = channel.Srate();
+     ss << 'I' << Inversion;
+     ss << 'M' << Type;
+
+     // not used in VDR: BandWidth, System, C2tft, DS, Plp
+     if (DebugRtcp) {
+        std::cout << Frequency << ":" << ss.str() << ":" << SymbolRate << std::endl;
+        }
+     channel.SetTransponderData('C' << 24, Frequency, SymbolRate, ss.str().c_str(), true);
+     }
 }
 
 void cSatipTuner::ProcessRtcpData(u_char *bufferP, int lengthP)

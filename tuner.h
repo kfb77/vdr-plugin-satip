@@ -8,6 +8,8 @@
 #ifndef __SATIP_TUNER_H
 #define __SATIP_TUNER_H
 
+#include <string>
+#include <vector>
 #include <vdr/thread.h>
 #include <vdr/tools.h>
 
@@ -134,6 +136,7 @@ private:
   cSatipPid addPidsM;
   cSatipPid delPidsM;
   cSatipPid pidsM;
+  std::vector<std::string> TP;
 
   bool Connect(void);
   bool Disconnect(void);
