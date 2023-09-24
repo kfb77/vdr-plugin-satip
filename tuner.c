@@ -352,7 +352,7 @@ void cSatipTuner::ProcessApplicationData(u_char *bufferP, int lengthP)
   size_t next = 1;
   int srcID = -1;
 
-  if (isSat)
+  if (payload[next].find("src=") == 0)
      srcID = StrToInt(payload[next++].substr(4));
 
   // tuner=<feID>,<level>,<lock>,<quality>,(..)
