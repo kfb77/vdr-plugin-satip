@@ -213,7 +213,7 @@ std::string GetTransponderUrlParameters(const cChannel* channel) {
         }
 
      if (fe)          ss << "&fe="    << fe;
-     ST("  S *")      ss << "&src="   << (src > 0) && (src <= 255) ? src : 1;
+     ST("  S *")      ss << "&src="   << ((src > 0) && (src <= 255) ? src : 1);
      if (freq > 0.0f) ss << "&freq="  << PrintFloat(freq);
      ST("  S *")      ss << "&pol="   << (char) tolower(dtp.Polarization());
      ST("  S *")      ss << PrintUrlString(dtp.RollOff(), SatipRollOffValues);
