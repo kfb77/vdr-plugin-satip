@@ -525,7 +525,7 @@ cString cPluginSatip::SVDRPCommand(const char *commandP, const char *optionP, in
      return cSatipDevice::GetSatipStatus();
      }
   else if (strcasecmp(commandP, "CONT") == 0) {
-     return cString::sprintf("SATIP device count: %u", cSatipDevice::Count());
+     return cString::sprintf("SATIP device count: %zu", cSatipDevice::Count());
      }
   else if (strcasecmp(commandP, "OPER") == 0) {
      cString mode;

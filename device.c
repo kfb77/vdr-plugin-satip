@@ -352,7 +352,7 @@ bool cSatipDevice::SetChannelDevice(const cChannel* channel, bool liveView)
       __PRETTY_FUNCTION__, channel ? channel->Number() : -1, liveView, deviceIndex);
 
   if (tuner == nullptr) {
-     dbg_chan_switch("%s [device %d] -> false (no tuner)", deviceIndex);
+     dbg_chan_switch("%s [device %d] -> false (no tuner)", __PRETTY_FUNCTION__, deviceIndex);
      return false;
      }
 
