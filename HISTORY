@@ -227,3 +227,8 @@ VDR Plugin 'satip' Revision History
 - Added timeout for HasLock (Thanks to Winfried Koehler).
 - Updated detectsatip script for Python 3.
 - Fixed keepalive interval.
+
+2024-0x-xx@wirbel
+- add bug fix from jojo61, streamID 0 is a valid stream ID.
+  see https://github.com/rofafor/vdr-plugin-satip/issues/85
+
