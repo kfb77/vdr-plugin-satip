@@ -54,6 +54,7 @@ SOFILE = libvdr-$(PLUGIN).so
 ### Libraries
 
 LIBS = $(shell curl-config --libs)
+LIBS += -lrepfunc
 
 ### Includes and Defines (add further entries here):
 
