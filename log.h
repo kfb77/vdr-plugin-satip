@@ -9,9 +9,9 @@
 
 #include "config.h"
 
-#define _E_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else esyslog(x); }
-#define _I_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else isyslog(x); }
-#define _D_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else dsyslog(x); }
+#define _E_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStderr)) { fprintf(stderr,x); fprintf(stderr,"\n"); } else esyslog(x); }
+#define _I_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStderr)) { fprintf(stderr,x); fprintf(stderr,"\n"); } else isyslog(x); }
+#define _D_(x...) { if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStdout)) { printf(x); printf("\n"); } else if (SatipConfig.IsDebugMode(cSatipConfig::DbgToStderr)) { fprintf(stderr,x); fprintf(stderr,"\n"); } else dsyslog(x); }
 
 #define error(x...)   _E_("SATIP-ERROR: " x)
 #define info(x...)    _I_("SATIP: " x)
