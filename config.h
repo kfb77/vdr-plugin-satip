@@ -63,7 +63,8 @@ public:
     DbgReserved1         = (1U << 13),
     DbgToStdout          = (1U << 14),
     DbgCallStackExt      = (1U << 15),
-    DbgModeMask          = 0xFFFF
+    DbgToStderr          = (1U << 16),
+    DbgModeMask          = 0x1FFFF
   };
   cSatipConfig();
   unsigned int GetOperatingMode(void) const { return operatingModeM; }
