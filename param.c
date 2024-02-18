@@ -177,6 +177,12 @@ std::string GetTransponderUrlParameters(const cChannel* channel) {
      auto PrintFloat = [](float& f) -> std::string {
         char buf[32];
         snprintf(buf, sizeof(buf), "%.3f", f);
+        for (size_t i = 0; i < strlen(buf); i++) {
+            if (buf[i] == ',') {
+                buf[i] = '.';
+                break;
+            }
+        }
         return buf;
         };
 
